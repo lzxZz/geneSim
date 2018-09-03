@@ -136,52 +136,83 @@ void read_gaf_file(const string file, vector<Annotation> &annos)
 
     while (getline(input_file, line))
     {
-        //获取所有的tab符位置，用于抽取对应的数据
-        vector<int> tab_index;
-        std::size_t index = 0;
-        while ((index =  line.find('\t',index+1)) < (line.size() -1))
-        {
-            tab_index.push_back(index);
-        }
 
+        vector<string> infos = string_split_by_char(line,'\t');
         string go_id;
         string gene_name;
         string evidence_code;
         Name_Space name_space = Name_Space::UNKNOWN;
         set<string> synonym;
-        if (tab_index.size() == 16)
+
+        go_id = "GO" + infos[4].substr(3);
+        gene_name = infos[2];
+        evidence_code = infos[6];
+
+        string ns = infos[8];
+        if (ns == "P")
         {
-            go_id = line.substr(tab_index[3] + 1, 10);
-            gene_name = line.substr(tab_index[1] + 1, tab_index[2] - tab_index[1]);
-            evidence_code = line.substr(tab_index[5] + 1, tab_index[6] - tab_index[5]);
-            string ns = line.substr(tab_index[7] + 1, 1);
-            if (ns == "P")
-            {
-                name_space = Name_Space::BP;
-            }
-            else if (ns == "F")
-            {
-                name_space = Name_Space::MF;
-            }
-            else if (ns == "C")
-            {
-                name_space = Name_Space::CC;
-            }
-
-            string syn = line.substr(tab_index[9] + 1, tab_index[10] - tab_index[9]);
-            int index;
-            while((index = syn.find("|")) < syn.size())
-            {
-                synonym.emplace(syn.substr(0,index));
-
-                syn = syn.replace(syn.begin(), syn.begin() + index +1, "");
-            }
-
-            Annotation tmp{go_id,gene_name,evidence_code,name_space};
-            tmp.get_synonym_gene().insert(synonym.begin(),synonym.end());
-            annos.push_back(tmp);
+            name_space = Name_Space::BP;
         }
+        else if (ns == "F")
+        {
+            name_space = Name_Space::MF;
+        }
+        else if (ns == "C")
+        {
+            name_space = Name_Space::CC;
+        }
+        vector<string> tmp_synonym = string_split_by_char(infos[10],'|');
+       // synonym.emplace(tmp_synonym.begin(), tmp_synonym.end() );
+
+       
+
+        Annotation tmp{go_id,gene_name,evidence_code,name_space};
+        tmp.get_synonym_gene().insert(tmp_synonym.begin(),tmp_synonym.end());
+        annos.push_back(tmp);
+        
     }
 
     
+}
+
+void read_ec_file(const string file, vector<string> &ecs)
+{
+
+    ifstream input_file;
+    input_file.open(file);
+    if (! input_file.is_open())
+    {
+        return;
+    }
+    
+    string line;
+    while (getline(input_file, line))
+    {
+        vector<string> infos;
+        infos = string_split_by_char(line,'\t');
+        ecs.emplace_back(infos[2] + "|" + infos[3]);
+    }
+    
+    
+}
+
+vector<string> string_split_by_char(const string &str, const char symbol)
+{
+    vector<string> result;
+    
+    string::const_iterator start,end;
+    start = str.begin();
+    end = str.begin();
+    
+    while(end != str.end())
+    {
+        if (*end == symbol)
+        {
+            result.emplace_back(start,end);
+            start = end;
+            start++;
+        }
+        end++;
+    } 
+    return result;
 }
