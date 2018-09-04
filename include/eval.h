@@ -7,7 +7,8 @@
 #include <set>
 #include <unordered_map>
 #include <cmath>
-#include "../include/calc.h"
+#include "calc.h"
+#include "shared.h"
 
 using std::set;
 using std::vector;

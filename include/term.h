@@ -18,6 +18,14 @@ using std::endl;
 using std::ostringstream;
 
 class Term{
+private:
+    string          id;
+    
+    Name_Space      name_space;
+    bool            obsolete;    //术语过时与否
+    string          name;
+    set<string>     part_ids;       //part_of关系的父节点id集合
+    set<string>     isa_ids;         //is_a关系的父节点id集合
 public:
     Term(string _id, Name_Space ns, bool obs, string _name = "")
         :id(_id), name_space(ns), obsolete(obs),name(_name)
@@ -39,7 +47,7 @@ public:
         return os.str();
     }
 
-#pragma region // 获取本体属性
+
     string get_id()
     {
         return id;
@@ -66,20 +74,13 @@ public:
         return isa_ids;
     }
 
-#pragma endregion
     
 
 
 
     ~Term(){}
     
-private:
-    string          id;
-    string          name;
-    Name_Space      name_space;
-    bool            obsolete;    //术语过时与否
-    set<string>     part_ids;       //part_of关系的父节点id集合
-    set<string>     isa_ids;         //is_a关系的父节点id集合
+
 };
 
 #endif

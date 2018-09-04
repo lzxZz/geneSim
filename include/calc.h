@@ -4,9 +4,11 @@
 #include <string>
 #include <vector>
 #include <set>
+#include "shared.h"
 using std::set;
 using std::vector;  
 using std::string;
+
 
 //计算两个基因之间的相似度
 double gene_sim(string gene1, string gene2);
@@ -21,4 +23,7 @@ double term_sim(string term1, string term2, string ingnore_genes);
 
 //计算给予路径约束的注释信息
 int get_u_abp(string ta, string tb, string tp);
+
+//计算两个术语的公共祖先节点
+set<string> get_public_ancestor(string term1, string term2);
 #endif

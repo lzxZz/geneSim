@@ -52,7 +52,7 @@ public:
         return os.str();
     }
 
-#pragma region //获取属性
+
     string get_go_id()
     {
         return go_id;
@@ -74,7 +74,7 @@ public:
         return synonym_gene;
     }
 
-#pragma endregion
+
 
     ~Annotation(){}
 private:

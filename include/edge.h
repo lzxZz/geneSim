@@ -12,7 +12,8 @@
 using std::string;
 
 
-class Edge{
+class Edge
+{
 public:
     //禁止隐式转换，并且同时构造出key
     explicit Edge(string g1, string g2, double wt = 0.0)

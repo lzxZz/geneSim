@@ -1,5 +1,6 @@
 #include "../include/eval.h"
 
+
 //using map = std::unordered_map;
 
 //ec编号和基因集合的key，value对。map<string,set<string>>
@@ -12,7 +13,7 @@ void evaluator()
 {
     //获取所有的有效EC路径
     //vector<string> ec_numbers;
-    int ec_count;
+    int ec_count = 0;
     for (auto item : ec_numbers)
     {
         double lfc;
@@ -28,6 +29,7 @@ void evaluator()
                 lfc += get_diff(item, ecs_genes.at(item), ecs_genes.at(ej)) / ecs_genes.at(item).size();
             }
         }
+        lfc /= ec_count;
 
         std::cout << "EC 号:" << item << "\t\t" << lfc << std::endl;
     }

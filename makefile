@@ -21,7 +21,7 @@ $(TARGET) : $(OBJECTS)
 ./obj/data.o : data.cpp data.h term.h edge.h anno.h
 	gcc -c $(FLAGS) ./src/data.cpp -o ./obj/data.o
 
-./obj/shared.o : shared.cpp 
+./obj/shared.o : shared.cpp shared.h
 	gcc -c $(FLAGS) ./src/shared.cpp -o ./obj/shared.o
 
 ./obj/evaluator.o : evaluator.cpp calc.h
@@ -36,6 +36,7 @@ $(TARGET) : $(OBJECTS)
 .PHONY:run
 .PHONY:clean
 .PHONY:line
+.PHONY:mem
 
 line:
 	@wc -l ./src/*.cpp
@@ -48,3 +49,7 @@ clean:
 	@-rm $(TARGET)
 	@-rm $(OBJECTS)
 	@echo "finished clean"
+
+mem:
+	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all $(TARGET)
+

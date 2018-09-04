@@ -25,8 +25,9 @@ void read_net_file(const string file,vector<Edge> &edges)
     }
 }
 
-void read_obo_file(const string file,deque<Term> &terms)
+void read_obo_file(const string file,vector<Term> &terms)
 {
+    deque<Term> tmp_deque;
     ifstream input_file;
     input_file.open(file);
     if (! input_file.is_open()){
@@ -58,7 +59,7 @@ void read_obo_file(const string file,deque<Term> &terms)
 
             tmp.get_part_ids().insert(parts.begin(), parts.end());
             tmp.get_isa_ids().insert(isas.begin(), isas.end());
-            terms.emplace_back(tmp);
+            tmp_deque.emplace_back(tmp);
 
             //清空数据
             id      =   "";
@@ -119,11 +120,12 @@ void read_obo_file(const string file,deque<Term> &terms)
 
     tmp.get_part_ids().insert(parts.begin(), parts.end());
     tmp.get_isa_ids().insert(isas.begin(), isas.end());
-    terms.emplace_back(tmp);
+    tmp_deque.emplace_back(tmp);
 
 
     //移除掉第一个无效节点。
-    terms.pop_front();
+    tmp_deque.pop_front();
+    terms.insert(terms.begin(),tmp_deque.begin(),tmp_deque.end());
 }
 
 void read_gaf_file(const string file, vector<Annotation> &annos)
@@ -137,7 +139,12 @@ void read_gaf_file(const string file, vector<Annotation> &annos)
     while (getline(input_file, line))
     {
 
-        vector<string> infos = string_split_by_char(line,'\t');
+        vector<string> infos;
+        boost::split( infos, line, boost::is_any_of("\t"));
+       
+        //正常的注释文件有17列
+        assert(infos.size() == 17);
+
         string go_id;
         string gene_name;
         string evidence_code;
@@ -161,7 +168,9 @@ void read_gaf_file(const string file, vector<Annotation> &annos)
         {
             name_space = Name_Space::CC;
         }
-        vector<string> tmp_synonym = string_split_by_char(infos[10],'|');
+        vector<string> tmp_synonym;
+        boost::split( tmp_synonym, infos[10], boost::is_any_of("|"));
+
        // synonym.emplace(tmp_synonym.begin(), tmp_synonym.end() );
 
        
@@ -189,30 +198,40 @@ void read_ec_file(const string file, vector<string> &ecs)
     while (getline(input_file, line))
     {
         vector<string> infos;
-        infos = string_split_by_char(line,'\t');
-        ecs.emplace_back(infos[2] + "|" + infos[3]);
+        
+        //最后一个选项用于合并多个空白，不开启
+        boost::split(infos,line,boost::is_any_of("\t"));
+        
+        //正常的ec信息将会转化为5个项
+        assert(infos.size() == 5);
+
+        string tmp = infos[2];
+        tmp.append("|");
+        tmp.append(infos[3]);
+
+        ecs.push_back(tmp);
     }
     
     
 }
 
-vector<string> string_split_by_char(const string &str, const char symbol)
-{
-    vector<string> result;
+// vector<string> string_split_by_char(const string &str, const char symbol)
+// {
+//     vector<string> result;
     
-    string::const_iterator start,end;
-    start = str.begin();
-    end = str.begin();
+//     string::const_iterator start,end;
+//     start = str.begin();
+//     end = str.begin();
     
-    while(end != str.end())
-    {
-        if (*end == symbol)
-        {
-            result.emplace_back(start,end);
-            start = end;
-            start++;
-        }
-        end++;
-    } 
-    return result;
-}
+//     while(end != str.end())
+//     {
+//         if (*end == symbol)
+//         {
+//             result.emplace_back(start,end);
+//             start = end;
+//             start++;
+//         }
+//         end++;
+//     } 
+//     return result;
+// }
