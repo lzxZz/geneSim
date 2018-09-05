@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <set>
-#include "shared.h"
+//#include "shared.h"
 using std::set;
 using std::vector;  
 using std::string;
@@ -26,4 +26,7 @@ int get_u_abp(string ta, string tb, string tp);
 
 //计算两个术语的公共祖先节点
 set<string> get_public_ancestor(string term1, string term2);
+
+set<string> get_anno_by_id(string id);
+double get_dab(string term1, string term2);
 #endif
