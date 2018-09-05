@@ -11,9 +11,7 @@ using std::string;
 //获取指定id的公共祖先节点集合
 const set<string> &Data::Getter::get_public_ancestor_by_id(string term1, string term2)
 {
-    
-    set<string> s;
-    return s;
+    return datas.get_public_ancestor_by_id(term1,term2);
 }
 
 
@@ -25,7 +23,7 @@ const set<string> &Data::Getter::get_public_ancestor_by_id(string term1, string 
 //获取指定的术语注释的基因集合
 const set<string>& Data::Getter::get_term_node_anno_gene_set_by_id(string id)
 {
-
+    return datas.get_term_node_anno_gene_set_by_id(id);
 }
 
 
