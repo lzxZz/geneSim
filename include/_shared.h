@@ -6,7 +6,6 @@
 #include <set>
 #include <unordered_set>
 #include <unordered_map>
-#include <boost/algorithm/string.hpp>
 #include "data.h"
 #include "anno.h"
 #include "defs.h"
@@ -19,7 +18,7 @@ using std::set;
 using std::unordered_map;
 using std::pair;
 using std::make_pair;
-using namespace boost;
+
 
 
 //基因功能网络 key = g1:g2, value = weight / 10  做归一化处理
