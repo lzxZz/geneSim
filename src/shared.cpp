@@ -1,4 +1,4 @@
-#include "../include/shared.h"
+//#include "../include/shared.h"
 
 
 
@@ -39,7 +39,7 @@ init_ec_tab()
     for (auto item : ecs)
     {
         vector<string> infos;
-        split( infos, item, is_any_of("|"), token_compress_on);
+        split( infos, item, is_any_of("|"));
 
         ec_numbers.emplace_back(infos[0]);
         

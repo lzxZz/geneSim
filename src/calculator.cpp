@@ -11,21 +11,21 @@ double gene_sim(string gene1, string gene2)
     return 0.0;
 }
 
-//返回基因到基因集合最大相似度
-double term_and_set_max_sim(string term, set<string> term_set, string ignore_genes = "")
-{
-    double max_value = 0.0;
+// //返回基因到基因集合最大相似度
+// double term_and_set_max_sim(string term, set<string> term_set, string ignore_genes = "")
+// {
+//     double max_value = 0.0;
 
-    for (auto term2 : term_set)
-    {
-        double tmp_value = term_sim(term,term2,ignore_genes);
+//     for (auto term2 : term_set)
+//     {
+//         double tmp_value = term_sim(term,term2,ignore_genes);
 
-        max_value = max_value > tmp_value ? max_value : tmp_value;
+//         max_value = max_value > tmp_value ? max_value : tmp_value;
 
-    }
+//     }
 
-    return max_value;
-}
+//     return max_value;
+// }
 
 // double term_sim(string term1, string term2, string ingnore_genes)
 // {

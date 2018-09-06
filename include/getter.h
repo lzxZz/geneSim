@@ -54,7 +54,9 @@ namespace Data
         //判断两个ec是否有交叉的基因
         static bool is_inter_act_by_ec_number(string, string);
     private:
-         static Data datas;
+        static Data datas;
+        static bool is_init;
+        static void init();
     };
 }
 

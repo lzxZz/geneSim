@@ -19,7 +19,7 @@ void evaluator()
         for (auto ej : ec_numbers)
         {
             //如果不相交，则计算diff
-            if (! Data::Getter::is_inter_act(item,ej))
+            if (! Data::Getter::is_inter_act_by_ec_number(item,ej))
             {
                 const set<string>& genes_ei = Data::Getter::get_ec_genes_by_number(item); 
                 const set<string>& genes_ej = Data::Getter::get_ec_genes_by_number(item);

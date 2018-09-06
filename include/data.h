@@ -25,8 +25,7 @@ namespace Data
      
 
     private:
-        vector<::std::string> ec_numbers;
-        unordered_map<string, set<string>> ecs_gene_set;
+        
         //基因功能网络 key = g1:g2, value = weight / 10  做归一化处理
         unordered_map<string, double>                net_value;
 
@@ -38,7 +37,13 @@ namespace Data
         unordered_map<string, set<string>>           id_child;
 
         unordered_map<string, set<string>>           id_descendant;
+
+        unordered_map<string, set<string>>           id_gene_anno;
+
+        unordered_map<string, set<string>>           gene_id_anno;
         
+        vector<Annotation>                           gaf_items;
+        vector<Term>                                 onto_items;
 
         //三个分支的注释基因数目
         int  anno_gene_count_bp;
@@ -56,7 +61,25 @@ namespace Data
         //本体图路径节点 key = ta|tp value = gene_set
         unordered_map<string, set<string> >           path_genes;
 
+        bool is_init_root_count;
+        bool is_init_gaf_file;
+        bool is_init_obo_file;
+        bool is_init_net_file;
+        bool is_init_ec_file;
+        bool is_init_anno_map;
+        bool is_init_descendant;
+        bool is_init_ancestor;
+        bool is_init_id_term;
 
+        void init_root_count();
+        void init_gaf_list();
+        void init_obo_list();
+        void init_net_map();
+        void init_ec_list_and_map();
+        void init_anno_map();
+        void init_descendant(); 
+        void init_ancestor();
+        void init_id_term();
 
     public:
         vector<std::string> get_ec_numbers();
