@@ -368,6 +368,7 @@ void Data::Data::init_descendant()
             }
             
         }
+        input_file.close();
     }
     else
     {
@@ -420,7 +421,7 @@ void Data::Data::init_descendant()
             
         }
 
-
+        output_file.close();
     }
 
 
@@ -493,6 +494,147 @@ void Data::Data::init_id_term()
 
     is_init_id_term = true;
 }
+
+
+//初始化id-set的键值对
+void Data::Data::init_child()
+{
+    if (is_init_child)
+    {
+        return;
+    }
+    
+    //缓存文件
+    string buf_file = "./data/child.buf";
+
+    ifstream input_file;
+
+    input_file.open(buf_file);
+
+    if (input_file.is_open())
+    {//成功打开缓存文件
+        string line;
+        while (getline(input_file,line))
+        {
+            string key;
+            vector<string> infos;
+            boost::split(infos,line,boost::is_any_of(":"));
+
+            assert(infos.size() == 2);
+            
+            key = infos[0];
+            set<string> values;
+            boost::split(values, infos[1], boost::is_any_of("\t"));
+
+            auto it = id_child.find(key);
+
+            if (it == id_child.end())
+            {
+                id_child.emplace(make_pair(key, values));
+            }
+            else
+            {
+                it->second.insert(values.begin(), values.end());
+            }
+        }
+        input_file.close();
+    }
+    else
+    {//没有缓存文件
+        
+        for (auto term : onto_items)
+        {
+            string pid = term.get_id();
+            set<string> childs;
+            for (auto child_term : onto_items)
+            {
+                if (child_term.get_isa_ids().find(pid) != child_term.get_isa_ids().end() )
+                {
+                    childs.emplace(child_term.get_id());
+                }
+
+                if (child_term.get_part_ids().find(pid) != child_term.get_part_ids().end() )
+                {
+                    childs.emplace(child_term.get_id());
+                }
+            }
+
+            id_child.emplace(make_pair(pid, childs));
+        }
+
+        
+
+
+        //写入缓存文件
+        ofstream output_file;
+
+        output_file.open(buf_file,ios_base::app);
+
+        for (auto it : id_child)
+        {
+            output_file <<  it.first << ":";
+
+            for (auto child : it.second)
+            {
+                output_file << child << "\t";
+            }
+
+            output_file << endl;
+        }
+
+        output_file.close();
+    }
+    
+
+    is_init_child = true;
+}
+
+
+void Data::Data::init_path_node()
+{
+    if (is_init_path_node)
+    {
+        return ;
+    }
+
+    string buf_file = "./data.path.buf";
+
+    ifstream input_file;
+
+    input_file.open(buf_file);
+
+    if (input_file.is_open())
+    {//有缓存文件
+        string line;
+        while (getline(input_file, line))
+        {
+            string key;
+            vector<string> infos;
+            boost::split(infos, line, boost::is_any_of(":"));
+
+            assert(infos.size() == 2);
+
+            set<string> values;
+
+            boost::split(values, infos[1], boost::is_any_of("\t"));
+            path_nodes.emplace(make_pair(key, values)); 
+
+        }
+    }
+    else
+    {//无缓存文件，从路径缓存开始计算路径
+        
+        
+        //计算路径
+
+
+        //写入缓存文件
+    }
+    
+
+    is_init_path_node = true;
+}
+
 
 
 //****************************************************************
@@ -603,34 +745,165 @@ set<string> Data::Data::get_descendant_by_id(string id)
 
     return it->second;
 }
+
 set<string> Data::Data::get_child_by_id(string id)
 {
+    if ( ! is_init_child)
+    {
+        init_child();
+    }
 
+    assert(is_init_child);
+
+    auto it =  id_child.find(id);
+
+    if (it == id_child.end())
+    {
+        return set<string>{};
+    }
+
+    assert(it != id_child.end());
+
+    return it->second;
+
+    
 }
+
 set<string> Data::Data::get_path_anno_gene_set_by_id(string term_child, string term_parent)
 {
+    if (! is_init_path_node)
+    {
+        init_path_node();
+    }
 
+    assert(is_init_path_node);
+
+    string key = term_child + ":" + term_parent;
+
+    auto it = path_nodes.find(key); 
+
+    if (it == path_nodes.end())
+    {
+        return set<string>{};
+    }
+
+
+ 
+
+    assert(it != path_nodes.end());
+
+    return it->second;
+
+    return set<string>{};
 }
+
 set<string> Data::Data::get_child_anno_gene_set_by_id(string id)
 {
+    if (! is_init_anno_map)
+    {
+        init_anno_map();
+    }
+    assert(is_init_anno_map);
+
+    auto it = id_gene_anno.find(id);
+
+    if (it == id_gene_anno.end())
+    {
+        return set<string>{};
+    }
+
+    assert(it != id_gene_anno.end());
+
+    return it->second;
 
 }
 set<string> Data::Data::get_term_node_anno_gene_set_by_id(string id)
 {
+    if (! is_init_anno_map)
+    {
+        init_anno_map();
+    }
+    assert(is_init_anno_map);
+    
+    auto it = gene_id_anno.find(id);
 
+    if (it == gene_id_anno.end())
+    {
+        return set<string>{};
+    }
+
+    assert(it != gene_id_anno.end());
+
+    return it->second;
 }
+
+
 
 set<string> Data::Data::get_public_ancestor_by_id(string term1, string term2)
 {
-    return set<string>{};
+    set<string> public_ancestor;
+
+    auto it1 = id_ancestor.find(term1);
+    if (it1 == id_ancestor.end())
+    {
+        return set<string>{};
+    }
+
+    auto it2 = id_ancestor.find(term2);
+
+    if (it2 == id_ancestor.end())
+    {
+        return set<string>{};
+    }
+
+    for (auto id : it1->second)
+    {
+        if ( it2->second.find(id) != it2->second.end())
+        {
+            public_ancestor.emplace(id);
+        }
+    }
+
+    return public_ancestor;
 }
+
+
 double Data::Data::get_net_value_by_key(string key)
 {
+    auto it = net_value.find(key);
 
+    if (it != net_value.end())
+    {
+        return it->second;
+    }
+    
+    return 0;
 }
 int Data::Data::get_root_node_anno_gene_count(Name_Space ns)
 {
+    if (! is_init_root_count)
+    {
+        init_root_count();
+    }
 
+    assert(is_init_root_count);
+
+
+    switch (ns)
+    {
+        case Name_Space::BP:
+            return anno_gene_count_bp;
+        case Name_Space::MF:
+            return anno_gene_count_mf;
+        case Name_Space::CC:
+            return anno_gene_count_cc;
+        case Name_Space::UNKNOWN:
+            return 0;
+    }
+
+
+    return 0;
+    
 }
 
 

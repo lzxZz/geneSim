@@ -59,7 +59,7 @@ namespace Data
         vector<string>                               ec_numbers;
 
         //本体图路径节点 key = ta|tp value = gene_set
-        unordered_map<string, set<string> >           path_genes;
+        unordered_map<string, set<string> >           path_nodes;
 
         bool is_init_root_count;
         bool is_init_gaf_file;
@@ -69,7 +69,9 @@ namespace Data
         bool is_init_anno_map;
         bool is_init_descendant;
         bool is_init_ancestor;
+        bool is_init_child;
         bool is_init_id_term;
+        bool is_init_path_node;
 
         void init_root_count();
         void init_gaf_list();
@@ -78,8 +80,10 @@ namespace Data
         void init_ec_list_and_map();
         void init_anno_map();
         void init_descendant(); 
+        void init_child();  
         void init_ancestor();
         void init_id_term();
+        void init_path_node();
 
     public:
         vector<std::string> get_ec_numbers();
