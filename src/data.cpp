@@ -2,11 +2,12 @@
 #include <boost/algorithm/string.hpp>
 #include <regex>
 #include <fstream>
+#include <iostream>
+
 using std::ifstream;
 using boost::is_any_of;
 
-
-
+set<string> Data::Data::null_set{};
 
 void Data::Data::init_root_count()
 {
@@ -139,6 +140,8 @@ void Data::Data::init_obo_list()
             tmp.get_part_ids().insert(parts.begin(), parts.end());
             tmp.get_isa_ids().insert(isas.begin(), isas.end());
             tmp_deque.emplace_back(tmp);
+            
+            //std::cout <<  tmp.debug() << std::endl;
 
             //清空数据
             id      =   "";
@@ -185,13 +188,13 @@ void Data::Data::init_obo_list()
 
         if (regex_match(line, part_reg))
         {
-            parts.emplace("GO" + line.substr(26,33));
+            parts.emplace("GO" + line.substr(25,7));
         }
         if (regex_match(line, isa_reg))
         {
-            isas.emplace("GO" + line.substr(10,17));
+            isas.emplace("GO" + line.substr(9,7));
         }
-
+        
     }
 
     //加入最后一个节点，
@@ -454,7 +457,7 @@ void Data::Data::init_ancestor()
         set<string> ancestor;
         while (add_list.size() > 0)
         {
-            string id;
+            string id = add_list[0];
             auto term_iter= id_term.find(id);
             assert(term_iter != id_term.end());
             Term term = term_iter->second;
@@ -669,6 +672,8 @@ set<string> Data::Data::get_gene_set_by_ec_number(string ec_number)
     assert(ecs_genes.size() != 0);
 
     auto it = ecs_genes.find(ec_number);
+
+
     if (it == ecs_genes.end())
     {
         return set<string>{};
@@ -794,7 +799,6 @@ set<string> Data::Data::get_path_anno_gene_set_by_id(string term_child, string t
 
     return it->second;
 
-    return set<string>{};
 }
 
 set<string> Data::Data::get_child_anno_gene_set_by_id(string id)
@@ -841,19 +845,25 @@ set<string> Data::Data::get_term_node_anno_gene_set_by_id(string id)
 
 set<string> Data::Data::get_public_ancestor_by_id(string term1, string term2)
 {
+    if (! is_init_ancestor)
+    {
+        init_ancestor();
+    }
+    assert(is_init_ancestor);
+
     set<string> public_ancestor;
 
     auto it1 = id_ancestor.find(term1);
     if (it1 == id_ancestor.end())
     {
-        return set<string>{};
+        return null_set;
     }
 
     auto it2 = id_ancestor.find(term2);
 
     if (it2 == id_ancestor.end())
     {
-        return set<string>{};
+        return null_set;
     }
 
     for (auto id : it1->second)

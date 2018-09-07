@@ -21,13 +21,14 @@ Data::Data Data::Getter::datas{};
 // }
 
 //获取指定id的公共祖先节点集合
-const set<string>& Data::Getter::get_public_ancestor_by_id(string term1, string term2)
+const set<string> Data::Getter::get_public_ancestor_by_id(string term1, string term2)
 {
     // if (! is_init)
     // {
     //     init();
     // }
     return datas.get_public_ancestor_by_id(term1,term2);
+    
 }
 
 
@@ -37,7 +38,7 @@ const set<string>& Data::Getter::get_public_ancestor_by_id(string term1, string 
 
 
 //获取指定的术语注释的基因集合
-const set<string>& Data::Getter::get_term_node_anno_gene_set_by_id(string id)
+const set<string> Data::Getter::get_term_node_anno_gene_set_by_id(string id)
 {
     // if (! is_init)
     // {
@@ -48,7 +49,7 @@ const set<string>& Data::Getter::get_term_node_anno_gene_set_by_id(string id)
 
 
 //根据指定的两个术语，获取其注释的基因集合
-const set<string>& Data::Getter::get_path_anno_gene_set_by_id(string term_child, string term_parent)
+const set<string> Data::Getter::get_path_anno_gene_set_by_id(string term_child, string term_parent)
 {
     // if (! is_init)
     // {
@@ -59,7 +60,7 @@ const set<string>& Data::Getter::get_path_anno_gene_set_by_id(string term_child,
 
 
 //获取术语注释的基因，包括注释在子孙节点上的注释，不包括id所指向的术语
-const set<string>& Data::Getter::get_child_anno_gene_set_by_id(string id)
+const set<string> Data::Getter::get_child_anno_gene_set_by_id(string id)
 {
     // if (! is_init)
     // {
@@ -93,7 +94,7 @@ const double Data::Getter::get_net_value_by_key(string key)
 
 
 //获取指定id的术语的所有子节点(直系)
-const set<string>& Data::Getter::get_child_by_id(string id)
+const set<string> Data::Getter::get_child_by_id(string id)
 {
     // if (! is_init)
     // {
@@ -105,7 +106,7 @@ const set<string>& Data::Getter::get_child_by_id(string id)
 
 
 //获取指定id的所有子孙节点
-const set<string>& Data::Getter::get_descendant_by_id(string id)
+const set<string> Data::Getter::get_descendant_by_id(string id)
 {
     // if (! is_init)
     // {
@@ -115,7 +116,7 @@ const set<string>& Data::Getter::get_descendant_by_id(string id)
 }
 
 //获取指定注释指定id术语的基因集合
-const set<string>& Data::Getter::get_anno_gene_set_by_id(string id)
+const set<string> Data::Getter::get_anno_gene_set_by_id(string id)
 {
     // if (! is_init)
     // {
@@ -125,7 +126,7 @@ const set<string>& Data::Getter::get_anno_gene_set_by_id(string id)
 }
 
 //获取指定基因所注释的基因。
-const set<string>& Data::Getter::get_anno_id_set_by_gene(string gene_name)
+const set<string> Data::Getter::get_anno_id_set_by_gene(string gene_name)
 {
     // if (! is_init)
     // {
@@ -137,7 +138,7 @@ const set<string>& Data::Getter::get_anno_id_set_by_gene(string gene_name)
 
         
 //获取所有的生物过程的ec号
-const vector<string>& Data::Getter::get_ec_numbers()
+const vector<string> Data::Getter::get_ec_numbers()
 {
     // if (! is_init)
     // {
@@ -148,7 +149,7 @@ const vector<string>& Data::Getter::get_ec_numbers()
 }
 
 //获取指定ec号的生物过程注释的基因
-const set<string>& Data::Getter::get_ec_genes_by_number(string ec_number)
+const set<string> Data::Getter::get_ec_genes_by_number(string ec_number)
 {
     // if (! is_init)
     // {
@@ -165,8 +166,8 @@ bool Data::Getter::is_inter_act_by_ec_number(string ec1, string ec2)
     // {
     //     init();
     // }
-    set<string> set1 = get_ec_genes_by_number(ec1);
-    set<string> set2 = get_ec_genes_by_number(ec2);
+    const set<string> set1 = get_ec_genes_by_number(ec1);
+    const set<string> set2 = get_ec_genes_by_number(ec2);
 
     for (auto gene: set1)
     {

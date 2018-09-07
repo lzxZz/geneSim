@@ -8,7 +8,9 @@ using namespace std;
 int
 main(int argc, char **argv){
     Data::Getter getter;
-    getter.get_public_ancestor_by_id("","");
+    const set<string>  ss = getter.get_public_ancestor_by_id("GO0015422", "GO0015423");
+
+    cout << ">>>" << ss.size() << "<<<" << endl;
     
     return 0;
 }

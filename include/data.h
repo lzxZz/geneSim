@@ -85,6 +85,8 @@ namespace Data
         void init_id_term();
         void init_path_node();
 
+        static set<string> null_set;
+
     public:
         vector<std::string> get_ec_numbers();
         set<string> get_gene_set_by_ec_number(string);
