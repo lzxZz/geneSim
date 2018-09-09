@@ -1,10 +1,11 @@
 TARGET=./debug/GeneSimilarity
 
-OBJECTS= ./obj/main.o \
-		./obj/data.o \
+OBJECTS= ./obj/data.o \
 		./obj/evaluator.o \
 		./obj/calculator.o \
-		./obj/getter.o
+		./obj/getter.o \
+		./obj/main.o \
+		./obj/log.o
 
 #./obj/shared.o \
 
@@ -19,9 +20,10 @@ $(TARGET) : $(OBJECTS)
 ./obj/getter.o : getter.cpp getter.h
 	gcc -c $(FLAGS) ./src/getter.cpp -o ./obj/getter.o
 
+./obj/log.o : log.cpp log.h
+	gcc -c $(FLAGS) ./src/log.cpp -o ./obj/log.o
 
-
-./obj/data.o : data.cpp data.h term.h edge.h anno.h
+./obj/data.o : data.cpp data.h term.h edge.h anno.h log.h
 	gcc -c $(FLAGS) ./src/data.cpp -o ./obj/data.o
 
 # ./obj/shared.o : shared.cpp shared.h

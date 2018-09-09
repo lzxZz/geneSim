@@ -23,8 +23,8 @@ namespace Data
         //获取指定的术语注释的基因集合
         static const set<string> get_term_node_anno_gene_set_by_id(string);
 
-        //根据指定的两个术语，获取其注释的基因集合
-        static const set<string> get_path_anno_gene_set_by_id(string, string);
+        //根据指定的两个术语，获取其路径上所有的节点集合
+        static const set<string> get_path_term_set_by_id(string, string);
 
         //获取术语注释的基因，包括注释在子孙节点上的注释，不包括id所指向的术语
         static const set<string> get_child_anno_gene_set_by_id(string);

@@ -15,7 +15,7 @@ void Data::Data::init_root_count()
     {
         return;
     }
-
+     Log::log({__FILE__, __func__ , "开始初始化根节点类别下所有的注释基因总数"});
     //初始化注释文件项列表，以获取所有的基因
     init_gaf_list();
 
@@ -37,6 +37,7 @@ void Data::Data::init_root_count()
         }
     }   
     is_init_root_count = true;
+    Log::log({__FILE__, __func__ , "root_count 初始化完成"});
 }
 
 void Data::Data::init_gaf_list()
@@ -45,7 +46,7 @@ void Data::Data::init_gaf_list()
     {
         return;
     }
-
+     Log::log({__FILE__, __func__ , "开始初始化注释基因列表"});
 
     string file = "./data/gene.gaf";
 
@@ -96,6 +97,7 @@ void Data::Data::init_gaf_list()
         
     }
     is_init_gaf_file = true;
+     Log::log({__FILE__, __func__ , "注释基因列表初始化完成"});
 }
 
 void Data::Data::init_obo_list()
@@ -104,6 +106,7 @@ void Data::Data::init_obo_list()
     {
         return ;
     }
+    Log::log({__FILE__, __func__ , "开始初始化本体节点列表"});
 
     string file = "./data/onto.obo";
 
@@ -210,6 +213,7 @@ void Data::Data::init_obo_list()
     onto_items.insert(onto_items.begin(), tmp_deque.begin(), tmp_deque.end());
 
     is_init_obo_file = true;
+    Log::log({__FILE__, __func__ , "初始化本体节点列表完成"});
 }
 
 void Data::Data::init_net_map()
@@ -218,7 +222,7 @@ void Data::Data::init_net_map()
     {
         return ;
     }
-
+    Log::log({__FILE__, __func__ , "开始初始化功能网络map数据"});
     string file = "./data/net.txt";
     ifstream input_file;
     
@@ -237,6 +241,7 @@ void Data::Data::init_net_map()
         net_value.emplace(make_pair(key, weight));
     }
     is_init_net_file = true;
+    Log::log({__FILE__, __func__ , "基因功能网络map数据初始化完成"});
 }
 
 void Data::Data::init_ec_list_and_map()
@@ -245,6 +250,7 @@ void Data::Data::init_ec_list_and_map()
     {
         return;
     }
+    Log::log({__FILE__, __func__ , "开始初始化生物过程信息数据"});
 
     string file = "./data/ec.tab";
 
@@ -257,6 +263,7 @@ void Data::Data::init_ec_list_and_map()
     }
     
     string line;
+    set<string> tmp_numbers;
     while (getline(input_file, line))
     {
         vector<string> infos;
@@ -267,14 +274,26 @@ void Data::Data::init_ec_list_and_map()
         //正常的ec信息将会转化为5个项
         assert(infos.size() == 5);
 
-        string tmp = infos[2];
-        tmp.append("|");
-        tmp.append(infos[3]);
+        
 
-        ec_numbers.push_back(tmp);
+        tmp_numbers.emplace(infos[2]);
+
+        auto it = ecs_genes.find(infos[2]);
+        if (it != ecs_genes.end())
+        {
+            it->second.emplace(infos[3]);
+        }
+        else
+        {
+            ecs_genes.emplace(make_pair(infos[2], set<string>{infos[3]}));
+        }
+        
     }
 
+    ec_numbers.insert(ec_numbers.end(), tmp_numbers.begin(), tmp_numbers.end());
+
     is_init_ec_file = true;
+    Log::log({__FILE__, __func__ , "生物过程数据初始化完成"});
 }
 
 void Data::Data::init_anno_map()
@@ -283,6 +302,8 @@ void Data::Data::init_anno_map()
     {
         return;
     }
+
+    Log::log({__FILE__, __func__ , "开始初始化id-genes,gene-ids的注释map数据"});
 
     init_gaf_list();
 
@@ -330,6 +351,7 @@ void Data::Data::init_anno_map()
 
 
     is_init_anno_map = true;
+    Log::log({__FILE__, __func__ , "id-genes,gene-ids注释map数据初始化完成"});
 }
 
 void Data::Data::init_descendant()
@@ -338,6 +360,7 @@ void Data::Data::init_descendant()
     {
         return;
     }
+    Log::log({__FILE__, __func__ , "开始初始化子孙节点数据"});
     //从缓存尝试读取数据
     string buf_file = "./data/descendant.buf";
 
@@ -347,6 +370,7 @@ void Data::Data::init_descendant()
 
     if (input_file.is_open())
     {
+        Log::log({__FILE__, __func__ , "缓存数据存在，从缓冲文件中加载数据"});
         //缓存数据存在
         string line, key;
         while (getline(input_file,line))
@@ -375,6 +399,7 @@ void Data::Data::init_descendant()
     }
     else
     {
+        Log::log({__FILE__, __func__ , "缓存数据不存在，开始手动计算数据"});
         //缓存数据不存在
         for (auto term : onto_items)
         {
@@ -399,7 +424,7 @@ void Data::Data::init_descendant()
 
         
 
-
+        Log::log({__FILE__, __func__ , "将子孙节点map数据缓存到硬盘"});
         //写入缓存文件
         ofstream output_file;
 
@@ -413,6 +438,7 @@ void Data::Data::init_descendant()
             
             if (iter.second.size() == 0)
             {
+                output_file << endl;
                 continue;
             }
             for (string id : iter.second)
@@ -429,6 +455,7 @@ void Data::Data::init_descendant()
 
 
     is_init_descendant = true;
+    Log::log({__FILE__, __func__ , "id-子孙节点map数据初始化完成"});
 }
 
 void Data::Data::init_ancestor()
@@ -437,7 +464,7 @@ void Data::Data::init_ancestor()
     {
         return ;
     }
-
+    Log::log({__FILE__, __func__ , "开始初始化id到祖先节点数据"});
 
     //前提条件，需要id_term的键值对数据
     if (! is_init_id_term)
@@ -476,10 +503,12 @@ void Data::Data::init_ancestor()
 
 
     is_init_ancestor = true;
+    Log::log({__FILE__, __func__ , "id到祖先节点数据初始化完成"});
 }
 
 void Data::Data::init_id_term()
 {
+    
     if (is_init_id_term)
     {
         return ;
@@ -489,6 +518,7 @@ void Data::Data::init_id_term()
     {
         init_obo_list();
     }
+    Log::log({__FILE__, __func__ , "开始初始化id到节点的map数据"});
 
     for (auto term : onto_items)
     {
@@ -496,6 +526,7 @@ void Data::Data::init_id_term()
     }
 
     is_init_id_term = true;
+    Log::log({__FILE__, __func__ , "id到节点的map数据初始化完成"});
 }
 
 
@@ -506,7 +537,7 @@ void Data::Data::init_child()
     {
         return;
     }
-    
+    Log::log({__FILE__, __func__ , "开始初始化id到子节点的map数据"});
     //缓存文件
     string buf_file = "./data/child.buf";
 
@@ -516,6 +547,7 @@ void Data::Data::init_child()
 
     if (input_file.is_open())
     {//成功打开缓存文件
+        Log::log({__FILE__, __func__ , "从缓存中加载数据"});
         string line;
         while (getline(input_file,line))
         {
@@ -544,7 +576,7 @@ void Data::Data::init_child()
     }
     else
     {//没有缓存文件
-        
+        Log::log({__FILE__, __func__ , "没有缓存文件，手动计算数据"});
         for (auto term : onto_items)
         {
             string pid = term.get_id();
@@ -566,7 +598,7 @@ void Data::Data::init_child()
         }
 
         
-
+        Log::log({__FILE__, __func__ , "将缓存数据存盘"});
 
         //写入缓存文件
         ofstream output_file;
@@ -590,9 +622,10 @@ void Data::Data::init_child()
     
 
     is_init_child = true;
+    Log::log({__FILE__, __func__ , "id到子节点数据存盘"});
 }
 
-
+//key = id1:id2 
 void Data::Data::init_path_node()
 {
     if (is_init_path_node)
@@ -600,7 +633,9 @@ void Data::Data::init_path_node()
         return ;
     }
 
-    string buf_file = "./data.path.buf";
+    Log::log({ __FILE__, __func__, "开始初始化路径map数据"});
+
+    string buf_file = "./data/path.buf";
 
     ifstream input_file;
 
@@ -608,12 +643,14 @@ void Data::Data::init_path_node()
 
     if (input_file.is_open())
     {//有缓存文件
+        Log::log({ __FILE__, __func__, "读取缓存文件"});
+
         string line;
         while (getline(input_file, line))
         {
             string key;
             vector<string> infos;
-            boost::split(infos, line, boost::is_any_of(":"));
+            boost::split(infos, line, boost::is_any_of("|"));
 
             assert(infos.size() == 2);
 
@@ -623,21 +660,129 @@ void Data::Data::init_path_node()
             path_nodes.emplace(make_pair(key, values)); 
 
         }
+        input_file.close();
     }
     else
     {//无缓存文件，从路径缓存开始计算路径
-        
+        Log::log({__FILE__,  __func__, "无缓存文件，从path.pair中开始计算路径信息"});
+        ifstream pair_file;
+        pair_file.open("./dir/path.pair");
+
+        if (!pair_file.is_open())
+        {
+            return ;
+        }
+
+
+
         
         //计算路径
+        string line;
+        while (getline(pair_file, line))
+        {
+            string id1, id2;
+            vector<string> keys;
+
+            boost::split(keys, line, boost::is_any_of(":"));
+            id1 = keys[0];
+            id2 = keys[1];
+            set<string> nodes;
+            nodes = get_path_way_node(id1, id2);
+            path_nodes.emplace(make_pair(line, nodes));
+
+
+        }
 
 
         //写入缓存文件
+        Log::log({__FILE__,  __func__, "开始写入缓存文件"});
+        ofstream output_file;
+        output_file.open("./data/path.buf");
+
+        for (auto path : path_nodes)
+        {
+            output_file << path.first << "|";
+            for (auto value : path.second)
+            {
+                output_file << value << "\t" ;
+            }
+            output_file << endl;
+        }
+
+
+
+
     }
     
 
     is_init_path_node = true;
+    Log::log({__FILE__, __func__ , "路径Map信息初始化完成"});
 }
 
+
+set<string> Data::Data::get_path_way_node(string child_id, string parent_id)
+{
+    set<string> nodes;
+
+    if (! is_init_child)
+    {
+        init_child();
+    }
+    if (! is_init_descendant)
+    {
+        init_descendant();
+    }
+
+
+    assert(is_init_child);
+    assert(is_init_descendant);
+
+    auto it = id_child.find(parent_id);
+    Log::log({child_id, parent_id});
+    assert(it != id_child.end());
+
+    deque<string> search_list;
+    search_list.insert(search_list.end(), it->second.begin(), it->second.end());
+
+    while (search_list.size() > 0)
+    {
+        
+
+        string key = search_list.front();
+
+        //子孙节点中存在child_id则为路径上的节点，否则不是
+
+        auto set_it = id_descendant.find(key);
+
+        if (set_it == id_descendant.end())
+        {
+            search_list.pop_front();
+            continue;
+        }
+        assert(set_it != id_descendant.end());
+
+        set<string> des_set = set_it->second;
+
+        //子孙节点集合中包括child_id的才是路径上的节点，添加至返回结果
+        if (des_set.find(child_id) != des_set.end())
+        {
+            nodes.emplace(key);
+
+            auto add_it = id_child.find(key);
+            if (add_it != id_child.end())
+            {
+                search_list.insert(search_list.end(), add_it->second.begin(), add_it->second.end());
+            }
+        }
+
+
+        search_list.pop_front();
+        
+    }
+
+
+    return nodes;
+}
 
 
 //****************************************************************
@@ -774,7 +919,7 @@ set<string> Data::Data::get_child_by_id(string id)
     
 }
 
-set<string> Data::Data::get_path_anno_gene_set_by_id(string term_child, string term_parent)
+set<string> Data::Data::get_path_term_set_by_id(string term_child, string term_parent)
 {
     if (! is_init_path_node)
     {
@@ -809,16 +954,33 @@ set<string> Data::Data::get_child_anno_gene_set_by_id(string id)
     }
     assert(is_init_anno_map);
 
-    auto it = id_gene_anno.find(id);
+    if (! is_init_descendant)
+    {
+        init_descendant();
+    }
+    assert(is_init_descendant);
 
-    if (it == id_gene_anno.end())
+    auto it = id_descendant.find(id);
+
+    if (it == id_descendant.end())
     {
         return set<string>{};
     }
 
-    assert(it != id_gene_anno.end());
+    assert(it != id_descendant.end());
 
-    return it->second;
+    set<string> result;
+    for (auto child_id : it->second)
+    {
+        auto des_iter = id_gene_anno.find(child_id);
+
+        if (des_iter != id_gene_anno.end())
+        {
+            result.insert(des_iter->second.begin(), des_iter->second.end());
+        }
+    }
+
+    return result;
 
 }
 set<string> Data::Data::get_term_node_anno_gene_set_by_id(string id)
@@ -829,14 +991,14 @@ set<string> Data::Data::get_term_node_anno_gene_set_by_id(string id)
     }
     assert(is_init_anno_map);
     
-    auto it = gene_id_anno.find(id);
+    auto it = id_gene_anno.find(id);
 
-    if (it == gene_id_anno.end())
+    if (it == id_gene_anno.end())
     {
         return set<string>{};
     }
 
-    assert(it != gene_id_anno.end());
+    assert(it != id_gene_anno.end());
 
     return it->second;
 }
@@ -854,6 +1016,7 @@ set<string> Data::Data::get_public_ancestor_by_id(string term1, string term2)
     set<string> public_ancestor;
 
     auto it1 = id_ancestor.find(term1);
+
     if (it1 == id_ancestor.end())
     {
         return null_set;
@@ -880,6 +1043,12 @@ set<string> Data::Data::get_public_ancestor_by_id(string term1, string term2)
 
 double Data::Data::get_net_value_by_key(string key)
 {
+    if (! is_init_net_file)
+    {
+        init_net_map();
+    }
+    assert(is_init_net_file);
+    
     auto it = net_value.find(key);
 
     if (it != net_value.end())

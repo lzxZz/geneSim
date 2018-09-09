@@ -11,6 +11,7 @@
 #include "anno.h"
 #include "edge.h"
 #include "defs.h"
+#include "log.h"
 using std::string;
 using std::vector;
 using std::unordered_map;
@@ -42,7 +43,7 @@ namespace Data
 
         unordered_map<string, set<string>>           gene_id_anno;
         
-        vector<Annotation>                           gaf_items;
+        vector<Annotation>                              gaf_items;
         vector<Term>                                 onto_items;
 
         //三个分支的注释基因数目
@@ -87,6 +88,9 @@ namespace Data
 
         static set<string> null_set;
 
+        set<string> get_path_way_node(string child_id, string parent_id);
+        
+
     public:
         vector<std::string> get_ec_numbers();
         set<string> get_gene_set_by_ec_number(string);
@@ -94,7 +98,7 @@ namespace Data
         set<string> get_anno_gene_set_by_id(string);
         set<string> get_descendant_by_id(string);
         set<string> get_child_by_id(string);
-        set<string> get_path_anno_gene_set_by_id(string,string);
+        set<string> get_path_term_set_by_id(string,string);
         set<string> get_child_anno_gene_set_by_id(string);
         set<string> get_term_node_anno_gene_set_by_id(string);
         set<string> get_public_ancestor_by_id(string,string);

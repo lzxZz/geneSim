@@ -49,13 +49,13 @@ const set<string> Data::Getter::get_term_node_anno_gene_set_by_id(string id)
 
 
 //根据指定的两个术语，获取其注释的基因集合
-const set<string> Data::Getter::get_path_anno_gene_set_by_id(string term_child, string term_parent)
+const set<string> Data::Getter::get_path_term_set_by_id(string term_child, string term_parent)
 {
     // if (! is_init)
     // {
     //     init();
     // }
-    return datas.get_path_anno_gene_set_by_id(term_child,term_parent);
+    return datas.get_path_term_set_by_id(term_child,term_parent);
 }
 
 
