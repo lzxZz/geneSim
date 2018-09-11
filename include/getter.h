@@ -33,7 +33,7 @@ namespace Data
         static const int get_root_node_anno_gene_count(Name_Space);
 
         //获取功能网络数据
-        static const double get_net_value_by_key(string);
+        static const double get_net_value_by_keys(string, string);
         //获取指定id的术语的所有子节点(直系)
         static const set<string> get_child_by_id(string);
         //获取指定id的所有子孙节点
@@ -50,7 +50,7 @@ namespace Data
 
         //获取指定ec号的生物过程注释的基因
         static const set<string> get_ec_genes_by_number(string);
-
+        static const Term get_node_by_id(string);
         //判断两个ec是否有交叉的基因
         static bool is_inter_act_by_ec_number(string, string);
     private:

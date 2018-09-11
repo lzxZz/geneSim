@@ -4,17 +4,21 @@
     数据共享的类对象
 */
 #include <unordered_map>
+#include <set>
 #include <string>
 #include <vector>
 #include <set>
+#include <map>
 #include "term.h"
 #include "anno.h"
 #include "edge.h"
 #include "defs.h"
 #include "log.h"
 using std::string;
+using std::map;
 using std::vector;
 using std::unordered_map;
+using std::set;
 using std::set;  
 using namespace std;
 namespace Data
@@ -26,7 +30,10 @@ namespace Data
      
 
     private:
-        
+
+        vector<vector<double>>                      net_array;
+        map<string, int>                            gene_name_index;
+
         //基因功能网络 key = g1:g2, value = weight / 10  做归一化处理
         unordered_map<string, double>                net_value;
 
@@ -73,6 +80,7 @@ namespace Data
         bool is_init_child;
         bool is_init_id_term;
         bool is_init_path_node;
+        bool is_init_net_matrix;
 
         void init_root_count();
         void init_gaf_list();
@@ -85,7 +93,9 @@ namespace Data
         void init_ancestor();
         void init_id_term();
         void init_path_node();
-
+        void init_net_matrix();
+        double get_net_value_by_key(string);
+        
         static set<string> null_set;
 
         set<string> get_path_way_node(string child_id, string parent_id);
@@ -102,8 +112,10 @@ namespace Data
         set<string> get_child_anno_gene_set_by_id(string);
         set<string> get_term_node_anno_gene_set_by_id(string);
         set<string> get_public_ancestor_by_id(string,string);
-        double get_net_value_by_key(string);
+        
+        double get_net_value_by_keys(string, string);
         int get_root_node_anno_gene_count(Name_Space);
+        Term get_node_by_id(string);
 
     };
 

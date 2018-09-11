@@ -30,7 +30,8 @@ public:
     Term(string _id, Name_Space ns, bool obs, string _name = "")
         :id(_id), name_space(ns), obsolete(obs),name(_name)
     {
-
+        part_ids = set<string>{};
+        isa_ids = set<string>{};
     }
 
     string debug()

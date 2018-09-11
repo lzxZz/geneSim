@@ -12,7 +12,7 @@ OBJECTS= ./obj/data.o \
 #vpath %.o ./obj
 vpath %.cpp ./src
 vpath %.h ./include
-FLAGS= -Wall -I./include -g
+FLAGS= -Wall -I./include -g -pg
 
 $(TARGET) : $(OBJECTS)
 	g++ $(FLAGS) -o $(TARGET) $(OBJECTS)
@@ -43,7 +43,6 @@ $(TARGET) : $(OBJECTS)
 .PHONY:clean
 .PHONY:line
 .PHONY:mem
-
 line:
 	@wc -l ./src/*.cpp
 	@wc -l ./include/*.h
@@ -54,8 +53,10 @@ run:
 clean:
 	@-rm $(TARGET)
 	@-rm $(OBJECTS)
+	@-rm ./debug/.fuse*
 	@echo "finished clean"
 
 mem:
 	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all $(TARGET)
+
 

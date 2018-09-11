@@ -1,31 +1,42 @@
 #include <iostream>
-//#include "../include/shared.h"
-#include "../include/data.h"
-#include "../include/getter.h"
-
+#include "../include/eval.h"
+#include "../include/calc.h"
+#include <boost/timer.hpp>
+#include <fstream>
 
 
 using namespace std;
 
+void calc_3w_gene()
+{
+    int c = 0;
+    string line;
+    ifstream input;
+    input.open("./data/pair.txt");
+    while (getline(input, line))
+    {
+        if (++c > 30){return;}
+        istringstream  is(line);
+        string g1,g2;
+        is >> g1 >> g2;
+
+        boost::timer timer;
+        cout << g1 << "\t" << g2 << "\t" <<  gene_sim(g1, g2) << endl;
+        cout << timer.elapsed() << endl;
+
+
+    }
+    
+}
+
+
 int
 main(int argc, char **argv){
-    Data::Getter getter;
-    // const set<string>  ss = getter.get_public_ancestor_by_id("GO0015422", "GO0015423");
-    // const set<string> pathnodes = getter.get_path_term_set_by_id("GO0000002","GO0006996");
-    // cout << ">>>" << ss.size() << "<<<" << endl;
-    // cout << getter.get_anno_gene_set_by_id("GO0000165").size() << endl;
-    
-    // cout << getter.get_child_anno_gene_set_by_id("GO0008150") .size() << endl;
-    
-    // cout << getter.get_root_node_anno_gene_count(Name_Space::BP) << endl;
+    // evaluator();
+    calc_3w_gene();
 
-    // cout << getter.get_child_by_id("GO0008150").size() << endl;
-    // cout << getter.get_descendant_by_id("GO0008150").size() << endl;
-    // cout << getter.get_ec_genes_by_number("4.1.1.1").size() << endl;
-    // cout << getter.get_ec_numbers().size() << endl;
-    // cout << getter.get_net_value_by_key("YML100W:YMR261C") << endl;
-    cout << getter.get_term_node_anno_gene_set_by_id("GO0008150").size() << endl;
-
+    // // cout << term_sim("GO0015422", "GO0015423",{}) <<endl;
+    // cout << gene_sim("COX9", "QCR8") << endl;
 
     return 0;
 }

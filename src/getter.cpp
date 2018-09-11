@@ -11,14 +11,12 @@ using std::string;
 
 bool Data::Getter::is_init = false;
 Data::Data Data::Getter::datas{};
-// void Data::Getter::init()
-// {
-//     if (! is_init)
-//     {
-//         datas = Data{};
-//     }
-//     is_init = true;
-// }
+
+const Term Data::Getter::get_node_by_id(string id)
+{
+    return datas.get_node_by_id(id);
+}
+
 
 //获取指定id的公共祖先节点集合
 const set<string> Data::Getter::get_public_ancestor_by_id(string term1, string term2)
@@ -82,13 +80,13 @@ const int Data::Getter::get_root_node_anno_gene_count(Name_Space name_space)
 }
 
 //获取功能网络数据,key = g1 : g2
-const double Data::Getter::get_net_value_by_key(string key)
+const double Data::Getter::get_net_value_by_keys(string gene1, string gene2)
 {
     // if (! is_init)
     // {
     //     init();
     // }
-    return datas.get_net_value_by_key(key);
+    return datas.get_net_value_by_keys(gene1, gene2);
 
 }
 
@@ -162,10 +160,8 @@ const set<string> Data::Getter::get_ec_genes_by_number(string ec_number)
 //判断两个生物过程是否有相同的基因，有相同返回true
 bool Data::Getter::is_inter_act_by_ec_number(string ec1, string ec2)
 {
-    // if (! is_init)
-    // {
-    //     init();
-    // }
+    
+
     const set<string> set1 = get_ec_genes_by_number(ec1);
     const set<string> set2 = get_ec_genes_by_number(ec2);
 
