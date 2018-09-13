@@ -1,60 +1,32 @@
-#include <iostream>
-#include "../include/eval.h"
-#include "../include/calc.h"
-#include <boost/timer.hpp>
-#include <fstream>
+#include "../include/sim.h"
 
-
-using namespace std;
-
-void calc_3w_gene()
+int main()
 {
-    int c = 0;
-    string line;
-    ifstream input;
-    input.open("./data/pair.txt");
-    while (getline(input, line))
-    {
-        if (++c > 30){return;}
-        istringstream  is(line);
-        string g1,g2;
-        is >> g1 >> g2;
-
-        boost::timer timer;
-        cout << g1 << "\t" << g2 << "\t" <<  gene_sim(g1, g2) << endl;
-        cout << timer.elapsed() << endl;
+        // 前三步的计算都能够通过多线程来进行加速
+        // 读取参数，选择要进行的计算，输出文件如果已经存在，则不会进行计算，避免覆盖掉已有数据
 
 
-    }
-    
+        //矩阵完备化 MatrixComple
+        //输入参数,  类型选择，输出文件，参数列表(字符串，逗号分隔多个参数)，参数解析由完备化的具体类进行解析， 线程数，默认为2
+        // 只依赖于net数据
+
+        // 术语相似度计算 TermSimCalc
+        // 输入参数， 网络数据文件， 输出文件，线程数，默认为2
+        // 依赖于网络数据，本体结构，注释信息
+        // TermSim::Calculator("net_file", "out_file", 2);
+
+
+        // 基因相似度计算   GeneSim
+        // 输入参数， 术语相似度文件，输出文件，线程数，默认为2
+        // 依赖于术语相似度
+        // GeneSim::calculator("term_sim_file", "out_file", 2);
+
+        // lfc计算  Evaluator
+        // 输入参数， 基因相似度文件，输出文件，是否输出到控制台
+        // 依赖于基因相似度
+        
+        
+        Calculator::LFCValue::calculator("./result/gene.result", "./result/lfc.result", true);
+
+        return 0;
 }
-
-
-int
-main(int argc, char **argv){
-    // evaluator();
-    calc_3w_gene();
-
-    // // cout << term_sim("GO0015422", "GO0015423",{}) <<endl;
-    // cout << gene_sim("COX9", "QCR8") << endl;
-
-    return 0;
-}
-// #include <cstdio>
-// void prograss()
-// {
-//     int rate = 0; 
-//     char bar[102]; 
-//     char ch[] = "-\\|/"; 
-//     bar[0] = '\0';
-
-//     while(rate <= 100)
-//     {
-//         printf("[%-100s][%d\%][%c]\r", bar, rate, ch[rate%4]);
-//         fflush(stdout);
-//         bar[rate] = '=';
-//         bar[++rate] = '\0';
-//         system("sleep 1");
-//     }
-//     printf("\n");
-// }
