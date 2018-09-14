@@ -29,7 +29,8 @@ namespace Calculator
     {
     private:
         // 要计算的基因对
-        static vector<string>       gene_pairs;
+        static vector<string>                           gene_pairs;
+        static unordered_map<string, set<string>>       gene_ids_annos;  
 
         static void init_data(string);
         static double get_gene_similarity_by_keys(string, string);
