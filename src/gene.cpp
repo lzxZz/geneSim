@@ -45,18 +45,48 @@ void Calculator::GeneSim::calculator(string gene_pair_file, string out_file, int
 
 double Calculator::GeneSim::get_gene_similarity_by_keys(string g1, string g2)
 {
-    auto iter = gene_ids_annos.find(g1);
-    if (iter != gene_ids_annos.end())
+    auto iter_g1 = gene_ids_annos.find(g1);
+    auto iter_g2 = gene_ids_annos.find(g2);
+
+    if (iter_g1 == gene_ids_annos.end() || iter_g2 == gene_ids_annos.end())
     {
-        std::cout << "基因" << g1 <<"注释的术语有" ;
-        for (auto id : iter->second)
-        {
-            std::cout << id << "\t" ;
-        }
-        std::cout << std::endl;
+        return 0;
     }
-    return 0;
+
+    assert(iter_g1 != gene_ids_annos.end());
+    assert(iter_g2 != gene_ids_annos.end());
+
+    double top_value = 0, bottom_value = 0;
+    bottom_value = iter_g1->second.size() + iter_g2->second.size();
+
+    for (auto t1 : iter_g1->second)
+    {
+        top_value += get_max_term_and_set_sim(t1, iter_g2->second, {g1, g2});
+    }
+
+    for (auto t2 : iter_g2->second)
+    {
+        top_value += get_max_term_and_set_sim(t2, iter_g1->second, {g1, g2});
+    }
+    
+    
+    return top_value / bottom_value;
 }
+
+double  Calculator::GeneSim::get_max_term_and_set_sim(string id, set<string> terms, initializer_list<string> ignore_genes)
+{
+    double max_value = 0.0;
+
+    for (auto term : terms)
+    {
+        double tmp_value = Calculator::TermSim::get_term_sim_by_ids(id, term, ignore_genes);
+        max_value = max_value > tmp_value ? max_value : tmp_value;
+    }
+
+
+    return max_value;
+}
+
 
 void Calculator::GeneSim::init_data(string gene_pair_file)
 {

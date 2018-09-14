@@ -8,11 +8,13 @@
 #include <vector>
 #include <unordered_map>
 #include <set>
+#include <initializer_list>
 
 using std::set;
 using std::vector;
 using std::unordered_map;
 using std::string;
+using std::initializer_list;
 
 
 
@@ -20,7 +22,8 @@ namespace Calculator
 {
     class TermSim
     {
-
+    public:
+        static double get_term_sim_by_ids(string,string,initializer_list<string>);
     };
 
 
@@ -34,6 +37,7 @@ namespace Calculator
 
         static void init_data(string);
         static double get_gene_similarity_by_keys(string, string);
+        static double get_max_term_and_set_sim(string, set<string>, initializer_list<string>);
     public:
         // 基因相似度计算，参数分别为，要计算的基因对（\t分割），输出文件夹，并行线程数
         static void calculator(string, string, int = 2);
