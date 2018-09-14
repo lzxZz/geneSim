@@ -1,7 +1,8 @@
 TARGET=./debug/GeneSimilarity
 
 OBJS = ./obj/main.o \
-		./obj/lfc.o
+		./obj/lfc.o \
+		./obj/gene.o
 
 FLAGS = -Wall -pg -g
 
@@ -18,6 +19,8 @@ $(TARGET) : $(OBJS)
 ./obj/lfc.o : lfc.cpp sim.h
 	gcc -c $(FLAGS) ./src/lfc.cpp -o ./obj/lfc.o
 
+./obj/gene.o : gene.cpp sim.h
+	gcc -c $(FLAGS) ./src/gene.cpp -o ./obj/gene.o
 
 .PHONY:run
 .PHONY:clean

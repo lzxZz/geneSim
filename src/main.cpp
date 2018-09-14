@@ -17,16 +17,17 @@ int main()
 
 
         // 基因相似度计算   GeneSim
-        // 输入参数， 术语相似度文件，输出文件，线程数，默认为2
+        // 输入参数， 要计算的基因对文件，输出文件，线程数，默认为2
         // 依赖于术语相似度
-        // GeneSim::calculator("term_sim_file", "out_file", 2);
+        // Calculator::LFCValue::gene_pair_generator("./result/pair.result");
+        Calculator::GeneSim::calculator("./result/pair.result", "./result/test_gene.result");
 
         // lfc计算  Evaluator
         // 输入参数， 基因相似度文件，输出文件，是否输出到控制台
         // 依赖于基因相似度
         
         
-        Calculator::LFCValue::calculator("./result/gene.result", "./result/lfc.result", true);
+        // Calculator::LFCValue::calculator("./result/gene.result", "./result/lfc.result", true);
 
         return 0;
 }

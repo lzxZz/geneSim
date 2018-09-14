@@ -4,3 +4,4 @@ debug/
 include.old/
 src.old/
 result/
+gmon.out
