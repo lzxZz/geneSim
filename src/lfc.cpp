@@ -219,7 +219,7 @@ double Calculator::LFCValue::get_diff_by_keys(string gene, string ei, string ej)
 double Calculator::LFCValue::get_gene_value_by_key(string key)
 {
     auto iter = gene_value.find(key);
-    if (iter != gene_value.end())
+    if (iter == gene_value.end())
     {
         return 0;
     }
