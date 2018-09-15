@@ -1,7 +1,28 @@
 #include "../include/sim.h"
 
+#include <fstream>
+#include <iostream>
+#include <cassert>
+using namespace std;
+
+
 int main()
 {
+        // ifstream input;
+
+        // input.open("./result/idgenes.result");
+
+        // assert(input.is_open());
+
+        // string line;
+        // set<string> ids;
+        // while (getline(input, line))
+        // {
+        //         ids.emplace(line);
+        // }
+
+        // std::cout << ids.size() << endl;
+
         // 前三步的计算都能够通过多线程来进行加速
         // 读取参数，选择要进行的计算，输出文件如果已经存在，则不会进行计算，避免覆盖掉已有数据
 
@@ -20,6 +41,7 @@ int main()
         // 输入参数， 要计算的基因对文件，输出文件，线程数，默认为2
         // 依赖于术语相似度
         // Calculator::LFCValue::gene_pair_generator("./result/pair.result");
+        
         Calculator::GeneSim::calculator("./result/pair.result", "./result/test_gene.result");
 
         // lfc计算  Evaluator

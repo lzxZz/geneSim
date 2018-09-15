@@ -76,7 +76,7 @@ double Calculator::GeneSim::get_gene_similarity_by_keys(string g1, string g2)
 double  Calculator::GeneSim::get_max_term_and_set_sim(string id, set<string> terms, initializer_list<string> ignore_genes)
 {
     double max_value = 0.0;
-
+    
     for (auto term : terms)
     {
         double tmp_value = Calculator::TermSim::get_term_sim_by_ids(id, term, ignore_genes);
