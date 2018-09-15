@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <set>
 #include <initializer_list>
+#include "defs.h"
+#include "anno.h"
 
 using std::set;
 using std::vector;
@@ -22,9 +24,31 @@ namespace Calculator
 {
     class TermSim
     {
+    private:
+        static vector<Annotation> gaf_items;
+        static vector<string>      term_pair;
+        static unordered_map<string, double>    net_value;
+        // id和对应的注释基因的集合
+        static unordered_map<string, set<string>>    id_gene_annos;
+        //分支注释基因总数
+        static int bp_anno_count;
+        static int mf_anno_count;
+        static int cc_anno_count;
+        //初始化数据,参数为网络数据文件
+        static void init_data(string);
+        //计算dab
+        static double get_dab(string, string, initializer_list<string>);
+        // 获取id对应的注释基因集合
+        static set<string> get_anno_gene_set_by_id(string);
+        static double get_net_value_by_keys(string, string);
+        static void init_gaf_list();
     public:
+
+
         // 计算两个术语之间的相似度,最后一个参数为要忽略的基因列表
         static double get_term_sim_by_ids(string,string,initializer_list<string>);
+        // 计算术语对的显示度,为基因相似度的计算做准备,输入的网络数据文件,输出文件,并发数
+        static void calculator(string, string, int = 2);
     };
 
 

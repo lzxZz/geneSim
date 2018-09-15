@@ -34,7 +34,8 @@ int main()
         // 术语相似度计算 TermSimCalc
         // 输入参数， 网络数据文件， 输出文件，线程数，默认为2
         // 依赖于网络数据，本体结构，注释信息
-        // TermSim::Calculator("net_file", "out_file", 2);
+        
+        Calculator::TermSim::calculator("./data/net.txt", "out_file", 2);
 
 
         // 基因相似度计算   GeneSim
@@ -42,7 +43,7 @@ int main()
         // 依赖于术语相似度
         // Calculator::LFCValue::gene_pair_generator("./result/pair.result");
         
-        Calculator::GeneSim::calculator("./result/pair.result", "./result/test_gene.result");
+        // Calculator::GeneSim::calculator("./result/pair.result", "./result/test_gene.result");
 
         // lfc计算  Evaluator
         // 输入参数， 基因相似度文件，输出文件，是否输出到控制台
