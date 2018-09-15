@@ -11,6 +11,7 @@
 #include <initializer_list>
 #include "defs.h"
 #include "anno.h"
+#include "term.h"
 
 using std::set;
 using std::vector;
@@ -28,8 +29,12 @@ namespace Calculator
         static vector<Annotation> gaf_items;
         static vector<string>      term_pair;
         static unordered_map<string, double>    net_value;
+        
+        static unordered_map<string, Term> id_term;
         // id和对应的注释基因的集合
         static unordered_map<string, set<string>>    id_gene_annos;
+        static unordered_map<string, set<string>>   id_path_nodes;
+        static unordered_map<string, set<string>>   id_ancestor;
         //分支注释基因总数
         static int bp_anno_count;
         static int mf_anno_count;
@@ -42,6 +47,12 @@ namespace Calculator
         static set<string> get_anno_gene_set_by_id(string);
         static double get_net_value_by_keys(string, string);
         static void init_gaf_list();
+        static void init_obo_list();
+        static int get_uabp(string, string, string);
+        static set<string> get_path_node_by_ids(string, string);
+        static int get_root_gene_count_by_id(string);
+        static void init_ancestor();
+        static set<string> get_public_ancestor_by_id(string,string);
     public:
 
 
