@@ -47,8 +47,8 @@ double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, init
 
 
 
-    double d = get_dab(term1,term2,{}); //    获取dab的值
-
+    // double d = get_dab(term1,term2,{}); //    获取dab的值
+    double d = get_dab_via_index(term1, term2);
     int term1_gene_count = get_anno_gene_set_by_id(term1).size();
     int term2_gene_count = get_anno_gene_set_by_id(term2).size(); //获取两个数据注释的基因总数
 
@@ -85,7 +85,10 @@ double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, init
 
 void Calculator::TermSim::calculator(string net_file, string out_file, int thread_count)
 {
+    
     init_data(net_file);
+
+
 
     ofstream out;
     out.open(out_file);
@@ -111,6 +114,7 @@ void Calculator::TermSim::calculator(string net_file, string out_file, int threa
         out << t1 << "\t" << t2 << "\t" << sim<< endl;
     }
     cout << timer.elapsed() <<  timer.elapsed()/300 << endl;
+    out.close();
 }
 
 int Calculator::TermSim::get_root_gene_count_by_id(string id)
@@ -197,6 +201,7 @@ void Calculator::TermSim::init_data(string net_file)
     }
     init_obo_list();
     init_ancestor();
+    init_array_data();
 
 }
 
@@ -309,7 +314,7 @@ double Calculator::TermSim::get_dab(string term1, string term2, initializer_list
             //string key = g1 + ":" + g2;
             tmp_value *= (1- get_net_value_by_keys(g1, g2));
         }
-        l12 += tmp_value;
+        l21 += tmp_value;
     }
 
 
@@ -666,4 +671,154 @@ set<string> Calculator::TermSim::get_public_ancestor_by_id(string term1, string 
     }
 
     return public_ancestor;
+}
+unordered_map<string, int>       Calculator::TermSim::gene_index;
+vector<vector<double>>           Calculator::TermSim::net_array;  //二维数组,存储网络值
+set<string>                          Calculator::TermSim::gene_names;
+unordered_map<string, vector<int>>      Calculator::TermSim::id_gene_index_anno;
+void Calculator::TermSim::init_array_data()
+{
+    ifstream input_net;
+    input_net.open("./data/net.txt");
+    assert(input_net.is_open());
+    
+    string line;
+    while (getline(input_net, line))
+    {
+        string g1,g2;
+        istringstream is(line);
+        is >> g1 >> g2;
+        gene_names.emplace(g1);
+        gene_names.emplace(g2);
+    }
+    for (auto i = 0; i < gene_names.size(); i++)
+    {
+        vector<double> tmp_vec(gene_names.size(),0);
+        
+        net_array.push_back(tmp_vec);
+    }
+
+    int index = 0;
+    for (auto gene : gene_names)
+    {
+        gene_index.emplace(std::make_pair(gene, index));
+        index++;
+    }
+
+    
+    for (auto iter : id_gene_annos)
+    {
+        if (iter.first == "GO0001300")
+        {
+            std:;cout << "" << endl;
+        }
+        vector<int> indexs;
+
+        for (auto gene : iter.second)
+        {
+            indexs.push_back(get_index_by_name(gene));
+        }
+
+        id_gene_index_anno.emplace(std::make_pair(iter.first, indexs));
+    }
+
+
+    for (auto iter : net_value)
+    {
+        string key = iter.first;
+        vector<string> genes;
+        boost::split(genes, key, boost::is_any_of(":"));
+       
+        assert(genes.size() == 2);
+        int x,y;
+        x = get_index_by_name(genes[0]);
+        y = get_index_by_name(genes[1]);
+
+        net_array.at(x).at(y) = iter.second;
+    }
+
+
+}
+
+int Calculator::TermSim::get_index_by_name(string name)
+{
+    auto iter = gene_index.find(name);
+
+    if (iter != gene_index.end())
+    {
+        return iter->second;
+    }
+
+    return -1;
+}
+
+vector<int> Calculator::TermSim::get_anno_gene_index_set_by_id(string id)
+{
+    auto iter = id_gene_index_anno.find(id);
+
+    if (iter != id_gene_index_anno.end())
+    {
+        return iter->second;
+    }
+
+    return {};
+}
+
+double Calculator::TermSim::get_net_value_by_index(int x, int y)
+{
+    if (x < 0 || y < 0)
+    {
+        return 0;
+    }
+    if (x > gene_names.size() || y > gene_names.size())
+    {
+        return 0;
+    }
+    return net_array.at(x).at(y);
+
+}
+
+
+//计算两个术语对应的基因集合之间的功能距离
+double Calculator::TermSim::get_dab_via_index(string term1, string term2)
+{
+    
+
+    vector<int> gene_set1 = get_anno_gene_index_set_by_id(term1);
+    vector<int> gene_set2 = get_anno_gene_index_set_by_id(term2);
+
+   
+    double l12,l21;
+
+    l12 = 0;
+    for (auto index1 : gene_set1)
+    {
+        double tmp_value = 1;   //累乘运算，初始值要是1
+        for (auto index2 : gene_set2)
+        {
+            //string key = g1 + ":" + g2;
+            tmp_value *= (1- get_net_value_by_index(index1, index2));
+        }
+        l12 += tmp_value;
+    }
+
+    l21 = 0;
+
+    for (auto index1 : gene_set2)
+    {
+        double tmp_value = 1;   //累乘运算，初始值要是1
+        for (auto index2 : gene_set1)
+        {
+            //string key = g1 + ":" + g2;
+            tmp_value *= (1- get_net_value_by_index(index1, index2));
+        }
+        l21 += tmp_value;
+    }
+
+
+    double value = 0;
+    value = (l12 + l21) / ( 2 * (gene_set1.size() + gene_set2.size()) - l12 - l21);
+    
+    return value;
+    
 }

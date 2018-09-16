@@ -26,6 +26,21 @@ namespace Calculator
     class TermSim
     {
     private:
+        // 数组索引使用的方法和数据
+        static unordered_map<string, int>       gene_index;
+        static vector<vector<double>>           net_array;  //二维数组,存储网络值
+        static set<string>                          gene_names;
+        static unordered_map<string, vector<int>>      id_gene_index_anno;
+        static int get_index_by_name(string);
+        static double get_net_value_by_index(int, int);
+        static vector<int> get_anno_gene_index_set_by_id(string);
+        static void init_array_data();
+        // 通过索引来计算dab
+        static double get_dab_via_index(string, string);
+
+
+
+        //hash操作所使用的方法和数据
         static vector<Annotation> gaf_items;
         static vector<string>      term_pair;
         static unordered_map<string, double>    net_value;
