@@ -19,20 +19,25 @@ using std::deque;
 using std::regex;
 
 
-vector<string> Calculator::TermSim::term_pair;
-vector<Annotation> Calculator::TermSim::gaf_items;
-unordered_map<string, double>    Calculator::TermSim::net_value;
-unordered_map<string, set<string>>   Calculator::TermSim::id_path_nodes;
-unordered_map<string, set<string>>   Calculator::TermSim::id_gene_annos;
-unordered_map<string, Term>  Calculator::TermSim::id_term;
-unordered_map<string, set<string>>   Calculator::TermSim::id_ancestor;
+vector<string>                          Calculator::TermSim::term_pair;
+vector<Annotation>                      Calculator::TermSim::gaf_items;
+unordered_map<string, double>           Calculator::TermSim::net_value;
+unordered_map<string, set<string>>      Calculator::TermSim::id_path_nodes;
+unordered_map<string, set<string>>      Calculator::TermSim::id_gene_annos;
+unordered_map<string, Term>             Calculator::TermSim::id_term;
+unordered_map<string, set<string>>      Calculator::TermSim::id_ancestor;
 
+
+// 分支上所属的注释基因数目
 int  Calculator::TermSim::bp_anno_count;
 int  Calculator::TermSim::mf_anno_count;
 int  Calculator::TermSim::cc_anno_count;
 
+// 计算两个术语的相似度,  忽略指定的基因(论文中的除一法)
 double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, initializer_list<string> ignore_genes)
 {
+    // 函数所执行的操作说明见论文
+
     set<string> parent_set = get_public_ancestor_by_id(term1, term2); //获取公共祖先节点
     double max_value = 0.0;
 
@@ -48,7 +53,8 @@ double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, init
 
 
     // double d = get_dab(term1,term2,{}); //    获取dab的值
-    double d = get_dab_via_index(term1, term2);
+    double d = get_dab_via_index(term1, term2);     //索引获取网络数据,相较于hash获取快10倍
+    
     int term1_gene_count = get_anno_gene_set_by_id(term1).size();
     int term2_gene_count = get_anno_gene_set_by_id(term2).size(); //获取两个数据注释的基因总数
 
@@ -62,7 +68,7 @@ double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, init
         int uabp  = get_uabp(term1, term2, p);    //获取uabp的注释信息
 
         //计算f
-        double fabp = d * d * uabp + (1 - d * d) * sqrt(term1_gene_count * term2_gene_count);
+        double fabp = d * d * uabp + (1 - d * d) * sqrt(term1_gene_count * term2_gene_count);  
         
         //计算h
         double hab = d * d * root_gene_count + (1 - d * d) * term1_gene_count > term2_gene_count ? term1_gene_count : term2_gene_count ;
@@ -83,9 +89,11 @@ double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, init
     return max_value;
 }
 
+// 暴露给外部的接口,指定网络数据文件,计算结果,输出到相对应的输出文件中, 默认线程数为2(暂未实现)
 void Calculator::TermSim::calculator(string net_file, string out_file, int thread_count)
 {
     
+    //数据初始化
     init_data(net_file);
 
 
@@ -143,6 +151,7 @@ int Calculator::TermSim::get_root_gene_count_by_id(string id)
 
 void Calculator::TermSim::init_data(string net_file)
 {
+    // 读取网络数据文件
     ifstream input_net;
     input_net.open(net_file);
     assert(input_net.is_open());
@@ -151,6 +160,7 @@ void Calculator::TermSim::init_data(string net_file)
 
     while (getline(input_net, line))
     {
+        // 使用字符串流,节省了手动类型转换
         istringstream is(line);
         string g1,g2;
         double value;
@@ -163,6 +173,7 @@ void Calculator::TermSim::init_data(string net_file)
 
     input_net.close();
 
+    //读取要计算的术语对
     ifstream input_pair;
     input_pair.open("./result/ids.result");
     assert(input_pair.is_open());
@@ -174,6 +185,7 @@ void Calculator::TermSim::init_data(string net_file)
 
     input_pair.close();
 
+    // 初始化注释文件相关数据
     init_gaf_list();
     
     ifstream input_path;
@@ -199,6 +211,7 @@ void Calculator::TermSim::init_data(string net_file)
         
 
     }
+    
     init_obo_list();
     init_ancestor();
     init_array_data();
@@ -672,153 +685,4 @@ set<string> Calculator::TermSim::get_public_ancestor_by_id(string term1, string 
 
     return public_ancestor;
 }
-unordered_map<string, int>       Calculator::TermSim::gene_index;
-vector<vector<double>>           Calculator::TermSim::net_array;  //二维数组,存储网络值
-set<string>                          Calculator::TermSim::gene_names;
-unordered_map<string, vector<int>>      Calculator::TermSim::id_gene_index_anno;
-void Calculator::TermSim::init_array_data()
-{
-    ifstream input_net;
-    input_net.open("./data/net.txt");
-    assert(input_net.is_open());
-    
-    string line;
-    while (getline(input_net, line))
-    {
-        string g1,g2;
-        istringstream is(line);
-        is >> g1 >> g2;
-        gene_names.emplace(g1);
-        gene_names.emplace(g2);
-    }
-    for (auto i = 0; i < gene_names.size(); i++)
-    {
-        vector<double> tmp_vec(gene_names.size(),0);
-        
-        net_array.push_back(tmp_vec);
-    }
 
-    int index = 0;
-    for (auto gene : gene_names)
-    {
-        gene_index.emplace(std::make_pair(gene, index));
-        index++;
-    }
-
-    
-    for (auto iter : id_gene_annos)
-    {
-        if (iter.first == "GO0001300")
-        {
-            std:;cout << "" << endl;
-        }
-        vector<int> indexs;
-
-        for (auto gene : iter.second)
-        {
-            indexs.push_back(get_index_by_name(gene));
-        }
-
-        id_gene_index_anno.emplace(std::make_pair(iter.first, indexs));
-    }
-
-
-    for (auto iter : net_value)
-    {
-        string key = iter.first;
-        vector<string> genes;
-        boost::split(genes, key, boost::is_any_of(":"));
-       
-        assert(genes.size() == 2);
-        int x,y;
-        x = get_index_by_name(genes[0]);
-        y = get_index_by_name(genes[1]);
-
-        net_array.at(x).at(y) = iter.second;
-    }
-
-
-}
-
-int Calculator::TermSim::get_index_by_name(string name)
-{
-    auto iter = gene_index.find(name);
-
-    if (iter != gene_index.end())
-    {
-        return iter->second;
-    }
-
-    return -1;
-}
-
-vector<int> Calculator::TermSim::get_anno_gene_index_set_by_id(string id)
-{
-    auto iter = id_gene_index_anno.find(id);
-
-    if (iter != id_gene_index_anno.end())
-    {
-        return iter->second;
-    }
-
-    return {};
-}
-
-double Calculator::TermSim::get_net_value_by_index(int x, int y)
-{
-    if (x < 0 || y < 0)
-    {
-        return 0;
-    }
-    if (x > gene_names.size() || y > gene_names.size())
-    {
-        return 0;
-    }
-    return net_array.at(x).at(y);
-
-}
-
-
-//计算两个术语对应的基因集合之间的功能距离
-double Calculator::TermSim::get_dab_via_index(string term1, string term2)
-{
-    
-
-    vector<int> gene_set1 = get_anno_gene_index_set_by_id(term1);
-    vector<int> gene_set2 = get_anno_gene_index_set_by_id(term2);
-
-   
-    double l12,l21;
-
-    l12 = 0;
-    for (auto index1 : gene_set1)
-    {
-        double tmp_value = 1;   //累乘运算，初始值要是1
-        for (auto index2 : gene_set2)
-        {
-            //string key = g1 + ":" + g2;
-            tmp_value *= (1- get_net_value_by_index(index1, index2));
-        }
-        l12 += tmp_value;
-    }
-
-    l21 = 0;
-
-    for (auto index1 : gene_set2)
-    {
-        double tmp_value = 1;   //累乘运算，初始值要是1
-        for (auto index2 : gene_set1)
-        {
-            //string key = g1 + ":" + g2;
-            tmp_value *= (1- get_net_value_by_index(index1, index2));
-        }
-        l21 += tmp_value;
-    }
-
-
-    double value = 0;
-    value = (l12 + l21) / ( 2 * (gene_set1.size() + gene_set2.size()) - l12 - l21);
-    
-    return value;
-    
-}

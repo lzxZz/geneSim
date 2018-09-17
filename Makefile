@@ -3,7 +3,8 @@ TARGET=./debug/GeneSimilarity
 OBJS = ./obj/main.o \
 		./obj/lfc.o \
 		./obj/gene.o \
-		./obj/term.o
+		./obj/term.o \
+		./obj/term_index.o
 
 FLAGS = -Wall -pg -g
 
@@ -25,6 +26,9 @@ $(TARGET) : $(OBJS)
 
 ./obj/term.o : term.cpp sim.h
 	gcc -c $(FLAGS) ./src/term.cpp -o ./obj/term.o
+
+./obj/term_index.o : term_index.cpp sim.h
+	gcc -c $(FLAGS) ./src/term_index.cpp -o ./obj/term_index.o
 
 .PHONY:run
 .PHONY:clean

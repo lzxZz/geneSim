@@ -4,5 +4,8 @@ debug/
 include.old/
 src.old/
 result/
-gmon.out
+
 *.out
+gmon.out
+out_file
+out_file_hash

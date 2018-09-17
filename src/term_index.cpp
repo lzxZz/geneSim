@@ -1,0 +1,185 @@
+#include "../include/sim.h"
+#include <iostream>
+#include <fstream>
+#include <cassert>
+#include <sstream>
+#include <cmath>
+#include <boost/algorithm/string.hpp>
+#include <boost/timer.hpp>
+#include <regex>
+#include <deque>
+
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::ofstream;
+using std::istringstream;
+using std::deque;
+using std::regex;
+
+// 基因名称到索引的映射
+unordered_map<string, int>       Calculator::TermSim::gene_index;
+
+//二维数组,存储网络值
+vector<vector<double>>           Calculator::TermSim::net_array;  
+// 基因名称列表,set自动去重复
+set<string>                          Calculator::TermSim::gene_names;
+
+// 获取术语注释的基因集合的索引,由于很多的基因实际上并不在网络数据之中,因此使用vector来实现,而不是set,set会影响最终结果
+//  不存在的基因索引使用-1表示
+unordered_map<string, vector<int>>      Calculator::TermSim::id_gene_index_anno;
+
+
+// 初始化索引访问所需要的数据
+void Calculator::TermSim::init_array_data()
+{
+    //开始读取网络数据
+    ifstream input_net;
+    input_net.open("./data/net.txt");
+    assert(input_net.is_open());
+    
+    //读取基因的名称
+    string line;
+    while (getline(input_net, line))
+    {
+        string g1,g2;
+        istringstream is(line);
+        is >> g1 >> g2;
+        gene_names.emplace(g1);
+        gene_names.emplace(g2);
+    }
+
+    //用0初始化矩阵
+    for (auto i = 0; i < gene_names.size(); i++)
+    {
+        vector<double> tmp_vec(gene_names.size(),0);
+        
+        net_array.push_back(tmp_vec);
+    }
+
+    //构造基因名称到索引的hashmap
+    int index = 0;
+    for (auto gene : gene_names)
+    {
+        gene_index.emplace(std::make_pair(gene, index));
+        index++;
+    }
+
+    // 构造id到基因索引的hashmap
+    for (auto iter : id_gene_annos)
+    {
+        
+        vector<int> indexs;
+
+        for (auto gene : iter.second)
+        {
+            //将基因名称转换为索引
+            indexs.push_back(get_index_by_name(gene));
+        }
+
+        id_gene_index_anno.emplace(std::make_pair(iter.first, indexs));
+    }
+
+    //读取网络数据文件,覆盖掉0矩阵中相对应的值
+    for (auto iter : net_value)
+    {
+        string key = iter.first;
+        vector<string> genes;
+        boost::split(genes, key, boost::is_any_of(":"));
+       
+        assert(genes.size() == 2);//正常的都会有两个基因名称
+        int x,y;
+        x = get_index_by_name(genes[0]);
+        y = get_index_by_name(genes[1]);
+
+        net_array.at(x).at(y) = iter.second;
+    }
+
+
+}
+
+// 获取基因对应的索引,不存在的基因返回-1的索引
+int Calculator::TermSim::get_index_by_name(string name)
+{
+    auto iter = gene_index.find(name);
+
+    if (iter != gene_index.end())
+    {
+        return iter->second;
+    }
+
+    return -1;
+}
+
+// 获取术语对应的注释基因集合的索引集合
+vector<int> Calculator::TermSim::get_anno_gene_index_set_by_id(string id)
+{
+    auto iter = id_gene_index_anno.find(id);
+
+    if (iter != id_gene_index_anno.end())
+    {
+        return iter->second;
+    }
+
+    return {};
+}
+
+//  获取网络数据的值,通过索引
+double Calculator::TermSim::get_net_value_by_index(int x, int y)
+{
+    if (x < 0 || y < 0)
+    {
+        return 0;
+    }
+    if (x > gene_names.size() || y > gene_names.size())
+    {
+        return 0;
+    }
+    return net_array.at(x).at(y);
+
+}
+
+
+//计算两个术语对应的基因集合之间的功能距离,程序整体结构与get_adb(string, string)一致,但是在获取网络数据的时候使用索引进行访问.
+double Calculator::TermSim::get_dab_via_index(string term1, string term2)
+{
+    //具体计算步骤参见公式201
+
+    vector<int> gene_set1 = get_anno_gene_index_set_by_id(term1);
+    vector<int> gene_set2 = get_anno_gene_index_set_by_id(term2);
+
+   
+    double l12,l21;
+
+    l12 = 0;
+    for (auto index1 : gene_set1)
+    {
+        double tmp_value = 1;   //累乘运算，初始值要是1
+        for (auto index2 : gene_set2)
+        {
+            //string key = g1 + ":" + g2;
+            tmp_value *= (1- get_net_value_by_index(index1, index2));
+        }
+        l12 += tmp_value;
+    }
+
+    l21 = 0;
+
+    for (auto index1 : gene_set2)
+    {
+        double tmp_value = 1;   //累乘运算，初始值要是1
+        for (auto index2 : gene_set1)
+        {
+            //string key = g1 + ":" + g2;
+            tmp_value *= (1- get_net_value_by_index(index1, index2));
+        }
+        l21 += tmp_value;
+    }
+
+
+    double value = 0;
+    value = (l12 + l21) / ( 2 * (gene_set1.size() + gene_set2.size()) - l12 - l21);
+    
+    return value;
+    
+}
