@@ -21,7 +21,7 @@ void Calculator::GeneSim::calculator(string gene_pair_file, string out_file, int
     if (access(out_file.c_str(), 0) == 0)
     {
         std::cout << "输出文件已存在，请重新指定文件名" << std::endl;
-        //return;
+        return;
     }
     ofstream out;
     out.open(out_file);
@@ -79,7 +79,8 @@ double  Calculator::GeneSim::get_max_term_and_set_sim(string id, set<string> ter
     
     for (auto term : terms)
     {
-        double tmp_value = Calculator::TermSim::get_term_sim_by_ids(id, term, ignore_genes);
+            //修改为从文件读取术语相似度,速度更快
+        double tmp_value = Calculator::TermSim::get_term_sim_by_ids_from_file(id, term, ignore_genes);
         max_value = max_value > tmp_value ? max_value : tmp_value;
     }
 
@@ -176,3 +177,4 @@ void Calculator::GeneSim::init_data(string gene_pair_file)
     
 
 }
+

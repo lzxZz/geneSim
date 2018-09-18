@@ -38,6 +38,8 @@ namespace Calculator
         // 通过索引来计算dab
         static double get_dab_via_index(string, string);
 
+        static unordered_map<string, double>    keys_term_sim;
+        static void init_file();
 
 
         //hash操作所使用的方法和数据
@@ -73,6 +75,11 @@ namespace Calculator
 
         // 计算两个术语之间的相似度,最后一个参数为要忽略的基因列表
         static double get_term_sim_by_ids(string,string,initializer_list<string>);
+
+        // 计算两个术语之间的相似度,最后一个参数为要忽略的基因列表
+        static double get_term_sim_by_ids_from_file(string,string,initializer_list<string>);
+
+
         // 计算术语对的显示度,为基因相似度的计算做准备,输入的网络数据文件,输出文件,并发数
         static void calculator(string, string, int = 2);
     };

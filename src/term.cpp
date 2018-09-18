@@ -33,9 +33,46 @@ int  Calculator::TermSim::bp_anno_count;
 int  Calculator::TermSim::mf_anno_count;
 int  Calculator::TermSim::cc_anno_count;
 
+unordered_map<string, double> Calculator::TermSim::keys_term_sim;
+static bool is_init;
+void Calculator::TermSim::init_file()
+{
+    ifstream input("./result/term.result");
+    assert(input.is_open());
+    string line;
+    while (getline(input, line))
+    {
+        istringstream is(line);
+        string t1, t2;
+        double value;
+        is >> t1 >> t2 >> value;
+
+        keys_term_sim.emplace(std::make_pair(t1+":"+t1, value));
+    }
+    is_init = true;
+}
+
+double Calculator::TermSim::get_term_sim_by_ids_from_file(string term1, string term2, initializer_list<string> ignore_genes){
+if (! is_init)
+    {
+        init_file();
+    }
+    term1 = "GO"+term1.substr(3,7);
+    term2 = "GO"+term2.substr(3,7);
+    auto iter = keys_term_sim.find(term1 + ":" + term2);
+
+    if (iter != keys_term_sim.end())
+    {
+        return iter->second;
+    }
+
+    return 0;
+}
 // 计算两个术语的相似度,  忽略指定的基因(论文中的除一法)
 double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, initializer_list<string> ignore_genes)
 {
+    
+
     // 函数所执行的操作说明见论文
 
     set<string> parent_set = get_public_ancestor_by_id(term1, term2); //获取公共祖先节点
@@ -52,8 +89,8 @@ double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, init
 
 
 
-    // double d = get_dab(term1,term2,{}); //    获取dab的值
-    double d = get_dab_via_index(term1, term2);     //索引获取网络数据,相较于hash获取快10倍
+    double d = get_dab(term1,term2,ignore_genes); //    获取dab的值
+    // double d = get_dab_via_index(term1, term2);     //索引获取网络数据,相较于hash获取快10倍
     
     int term1_gene_count = get_anno_gene_set_by_id(term1).size();
     int term2_gene_count = get_anno_gene_set_by_id(term2).size(); //获取两个数据注释的基因总数
@@ -93,25 +130,22 @@ double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, init
 void Calculator::TermSim::calculator(string net_file, string out_file, int thread_count)
 {
     
+    ofstream out;
+    out.open(out_file);
+    assert(out.is_open());
+
+
     //数据初始化
     init_data(net_file);
 
 
-
-    ofstream out;
-    out.open(out_file);
-    assert(out.is_open());
 
     int i =0;
     boost::timer timer;
 
     for (auto pair : term_pair)
     {
-        if (++i > 300)
-        {
-            
-            break;
-        }
+        
         istringstream is(pair);
         string t1,t2;
         is >> t1 >> t2;
@@ -120,8 +154,12 @@ void Calculator::TermSim::calculator(string net_file, string out_file, int threa
         double sim = get_term_sim_by_ids(t1,t2,{});
         cout << t1 << "\t" << t2 << "\t" << sim<< endl;
         out << t1 << "\t" << t2 << "\t" << sim<< endl;
+
+        
+            cout << "计算" << i << "对共用时" << timer.elapsed() << endl;
+        
     }
-    cout << timer.elapsed() <<  timer.elapsed()/300 << endl;
+    
     out.close();
 }
 
