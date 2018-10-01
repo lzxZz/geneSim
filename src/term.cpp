@@ -11,27 +11,25 @@
 #include <deque>
 
 using std::cout;
+using std::deque;
 using std::endl;
 using std::ifstream;
-using std::ofstream;
 using std::istringstream;
-using std::deque;
+using std::ofstream;
 using std::regex;
 
-
-vector<string>                          Calculator::TermSim::term_pair;
-vector<Annotation>                      Calculator::TermSim::gaf_items;
-unordered_map<string, double>           Calculator::TermSim::net_value;
-unordered_map<string, set<string>>      Calculator::TermSim::id_path_nodes;
-unordered_map<string, set<string>>      Calculator::TermSim::id_gene_annos;
-unordered_map<string, Term>             Calculator::TermSim::id_term;
-unordered_map<string, set<string>>      Calculator::TermSim::id_ancestor;
-
+vector<string> Calculator::TermSim::term_pair;
+vector<Annotation> Calculator::TermSim::gaf_items;
+unordered_map<string, double> Calculator::TermSim::net_value;
+unordered_map<string, set<string>> Calculator::TermSim::id_path_nodes;
+unordered_map<string, set<string>> Calculator::TermSim::id_gene_annos;
+unordered_map<string, Term> Calculator::TermSim::id_term;
+unordered_map<string, set<string>> Calculator::TermSim::id_ancestor;
 
 // 分支上所属的注释基因数目
-int  Calculator::TermSim::bp_anno_count;
-int  Calculator::TermSim::mf_anno_count;
-int  Calculator::TermSim::cc_anno_count;
+int Calculator::TermSim::bp_anno_count;
+int Calculator::TermSim::mf_anno_count;
+int Calculator::TermSim::cc_anno_count;
 
 unordered_map<string, double> Calculator::TermSim::keys_term_sim;
 static bool is_init;
@@ -47,18 +45,19 @@ void Calculator::TermSim::init_file()
         double value;
         is >> t1 >> t2 >> value;
 
-        keys_term_sim.emplace(std::make_pair(t1+":"+t1, value));
+        keys_term_sim.emplace(std::make_pair(t1 + ":" + t1, value));
     }
     is_init = true;
 }
 
-double Calculator::TermSim::get_term_sim_by_ids_from_file(string term1, string term2, initializer_list<string> ignore_genes){
-if (! is_init)
+double Calculator::TermSim::get_term_sim_by_ids_from_file(string term1, string term2, initializer_list<string> ignore_genes)
+{
+    if (!is_init)
     {
         init_file();
     }
-    term1 = "GO"+term1.substr(3,7);
-    term2 = "GO"+term2.substr(3,7);
+    term1 = "GO" + term1.substr(3, 7);
+    term2 = "GO" + term2.substr(3, 7);
     auto iter = keys_term_sim.find(term1 + ":" + term2);
 
     if (iter != keys_term_sim.end())
@@ -71,7 +70,6 @@ if (! is_init)
 // 计算两个术语的相似度,  忽略指定的基因(论文中的除一法)
 double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, initializer_list<string> ignore_genes)
 {
-    
 
     // 函数所执行的操作说明见论文
 
@@ -84,14 +82,12 @@ double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, init
     {
         return 0;
     }
-    
-    int root_gene_count = get_root_gene_count_by_id(term1);//获取分支所有的基因数目
 
+    int root_gene_count = get_root_gene_count_by_id(term1); //获取分支所有的基因数目
 
+    // double d = get_dab(term1,term2,ignore_genes); //    获取dab的值
+    double d = get_dab_via_index(term1, term2); //索引获取网络数据,相较于hash获取快10倍
 
-    double d = get_dab(term1,term2,ignore_genes); //    获取dab的值
-    // double d = get_dab_via_index(term1, term2);     //索引获取网络数据,相较于hash获取快10倍
-    
     int term1_gene_count = get_anno_gene_set_by_id(term1).size();
     int term2_gene_count = get_anno_gene_set_by_id(term2).size(); //获取两个数据注释的基因总数
 
@@ -102,25 +98,23 @@ double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, init
 
     for (auto p : parent_set)
     {
-        int uabp  = get_uabp(term1, term2, p);    //获取uabp的注释信息
+        int uabp = get_uabp(term1, term2, p); //获取uabp的注释信息
 
         //计算f
-        double fabp = d * d * uabp + (1 - d * d) * sqrt(term1_gene_count * term2_gene_count);  
-        
+        double fabp = d * d * uabp + (1 - d * d) * sqrt(term1_gene_count * term2_gene_count);
+
         //计算h
-        double hab = d * d * root_gene_count + (1 - d * d) * term1_gene_count > term2_gene_count ? term1_gene_count : term2_gene_count ;
+        double hab = d * d * root_gene_count + (1 - d * d) * term1_gene_count > term2_gene_count ? term1_gene_count : term2_gene_count;
 
         //计算p注释的基因集合
         int parent_gene_count = get_anno_gene_set_by_id(p).size();
 
         //计算sim
-        double tmp_sim = (2 * log(root_gene_count) - 2 * log(fabp)) 
-                        / (2 * log(root_gene_count) - (log(term1_gene_count) + log(term2_gene_count) ) );
+        double tmp_sim = (2 * log(root_gene_count) - 2 * log(fabp)) / (2 * log(root_gene_count) - (log(term1_gene_count) + log(term2_gene_count)));
 
-        tmp_sim *= (1 - hab * parent_gene_count / (root_gene_count * root_gene_count ) );
-        
+        tmp_sim *= (1 - hab * parent_gene_count / (root_gene_count * root_gene_count));
+
         max_value = max_value > tmp_sim ? max_value : tmp_sim;
-    
     }
 
     return max_value;
@@ -129,37 +123,32 @@ double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, init
 // 暴露给外部的接口,指定网络数据文件,计算结果,输出到相对应的输出文件中, 默认线程数为2(暂未实现)
 void Calculator::TermSim::calculator(string net_file, string out_file, int thread_count)
 {
-    
+
     ofstream out;
     out.open(out_file);
     assert(out.is_open());
 
-
     //数据初始化
     init_data(net_file);
 
-
-
-    int i =0;
+    int i = 0;
     boost::timer timer;
 
     for (auto pair : term_pair)
     {
-        
-        istringstream is(pair);
-        string t1,t2;
-        is >> t1 >> t2;
-        t1 = "GO" + t1.substr(3,7);
-        t2 = "GO" + t2.substr(3,7);
-        double sim = get_term_sim_by_ids(t1,t2,{});
-        cout << t1 << "\t" << t2 << "\t" << sim<< endl;
-        out << t1 << "\t" << t2 << "\t" << sim<< endl;
 
-        
-            cout << "计算" << i << "对共用时" << timer.elapsed() << endl;
-        
+        istringstream is(pair);
+        string t1, t2;
+        is >> t1 >> t2;
+        t1 = "GO" + t1.substr(3, 7);
+        t2 = "GO" + t2.substr(3, 7);
+        double sim = get_term_sim_by_ids(t1, t2, {});
+        cout << t1 << "\t" << t2 << "\t" << sim << endl;
+        out << t1 << "\t" << t2 << "\t" << sim << endl;
+
+        cout << "计算" << i++ << "对共用时" << timer.elapsed() << endl;
     }
-    
+
     out.close();
 }
 
@@ -175,18 +164,19 @@ int Calculator::TermSim::get_root_gene_count_by_id(string id)
 
     switch (ns)
     {
-        case Name_Space::BP:
-            return bp_anno_count;
-        case Name_Space::MF:
-            return mf_anno_count;
-        case Name_Space::CC:
-            return cc_anno_count;
-        case Name_Space::UNKNOWN:
-            return 0;
+    case Name_Space::BP:
+        return bp_anno_count;
+    case Name_Space::MF:
+        return mf_anno_count;
+    case Name_Space::CC:
+        return cc_anno_count;
+    case Name_Space::UNKNOWN:
+        return 0;
     }
     return 0;
 }
 
+///以来ids.result这一文件
 void Calculator::TermSim::init_data(string net_file)
 {
     // 读取网络数据文件
@@ -200,13 +190,12 @@ void Calculator::TermSim::init_data(string net_file)
     {
         // 使用字符串流,节省了手动类型转换
         istringstream is(line);
-        string g1,g2;
+        string g1, g2;
         double value;
         is >> g1 >> g2 >> value;
         string key = g1 + ":" + g2;
-        
-        net_value.emplace(std::make_pair(key,value));
 
+        net_value.emplace(std::make_pair(key, value));
     }
 
     input_net.close();
@@ -225,7 +214,7 @@ void Calculator::TermSim::init_data(string net_file)
 
     // 初始化注释文件相关数据
     init_gaf_list();
-    
+
     ifstream input_path;
     input_path.open("./data/path.buf");
     assert(input_path.is_open());
@@ -234,28 +223,24 @@ void Calculator::TermSim::init_data(string net_file)
     {
         vector<string> infos;
         boost::split(infos, line, boost::is_any_of("|"));
-        
+
         assert(infos.size() == 2);
 
         string key = infos[0];
         string values = infos[1];
-        
+
         boost::split(infos, values, boost::is_any_of("\t"));
 
         set<string> nodes;
         nodes.insert(infos.begin(), infos.end());
 
         id_path_nodes.emplace(std::make_pair(key, nodes));
-        
-
     }
-    
+
     init_obo_list();
     init_ancestor();
     init_array_data();
-
 }
-
 
 set<string> Calculator::TermSim::get_anno_gene_set_by_id(string id)
 {
@@ -269,9 +254,9 @@ set<string> Calculator::TermSim::get_anno_gene_set_by_id(string id)
 
 double Calculator::TermSim::get_net_value_by_keys(string g1, string g2)
 {
-    
+
     string key = g1 + ":" + g2;
-    
+
     auto iter = net_value.find(key);
     if (iter != net_value.end())
     {
@@ -310,7 +295,6 @@ int Calculator::TermSim::get_uabp(string ta, string tb, string tp)
         genes.insert(tmp_set.begin(), tmp_set.end());
     }
 
-
     return genes.size();
 }
 
@@ -331,7 +315,6 @@ set<string> Calculator::TermSim::get_path_node_by_ids(string term_child, string 
 //计算两个术语对应的基因集合之间的功能距离
 double Calculator::TermSim::get_dab(string term1, string term2, initializer_list<string> ingore_genes)
 {
-    
 
     set<string> gene_set1 = get_anno_gene_set_by_id(term1);
     set<string> gene_set2 = get_anno_gene_set_by_id(term2);
@@ -341,16 +324,16 @@ double Calculator::TermSim::get_dab(string term1, string term2, initializer_list
         gene_set1.erase(gene);
         gene_set2.erase(gene);
     }
-    double l12,l21;
+    double l12, l21;
 
     l12 = 0;
     for (auto g1 : gene_set1)
     {
-        double tmp_value = 1;   //累乘运算，初始值要是1
+        double tmp_value = 1; //累乘运算，初始值要是1
         for (auto g2 : gene_set2)
         {
             //string key = g1 + ":" + g2;
-            tmp_value *= (1- get_net_value_by_keys(g1, g2));
+            tmp_value *= (1 - get_net_value_by_keys(g1, g2));
         }
         l12 += tmp_value;
     }
@@ -359,27 +342,23 @@ double Calculator::TermSim::get_dab(string term1, string term2, initializer_list
 
     for (auto g1 : gene_set2)
     {
-        double tmp_value = 1;   //累乘运算，初始值要是1
+        double tmp_value = 1; //累乘运算，初始值要是1
         for (auto g2 : gene_set1)
         {
             //string key = g1 + ":" + g2;
-            tmp_value *= (1- get_net_value_by_keys(g1, g2));
+            tmp_value *= (1 - get_net_value_by_keys(g1, g2));
         }
         l21 += tmp_value;
     }
 
-
     double value = 0;
-    value = (l12 + l21) / ( 2 * (gene_set1.size() + gene_set2.size()) - l12 - l21);
-    
-    return value;
-    
-}
+    value = (l12 + l21) / (2 * (gene_set1.size() + gene_set2.size()) - l12 - l21);
 
+    return value;
+}
 
 void Calculator::TermSim::init_gaf_list()
 {
-    
 
     string file = "./data/gene.gaf";
 
@@ -438,26 +417,20 @@ void Calculator::TermSim::init_gaf_list()
             set<string> tmp_genes;
             tmp_genes.emplace(gene_name);
             tmp_genes.insert(tmp_synonym.begin(), tmp_synonym.end());
-            
+
             id_gene_annos.emplace(std::make_pair(go_id, tmp_genes));
         }
-        
+
         else
         {
             iter->second.emplace(gene_name);
             iter->second.insert(tmp_synonym.begin(), tmp_synonym.end());
         }
-        
-
     }
-    
-    
 }
-
 
 void Calculator::TermSim::init_obo_list()
 {
-  
 
     string obo_buf = "./data/obo.buf";
 
@@ -507,8 +480,6 @@ void Calculator::TermSim::init_obo_list()
             term.get_part_ids().insert(tmp_set.begin(), tmp_set.end());
             term.get_part_ids().erase("");
             id_term.emplace(std::make_pair(id, term));
-
-            
         }
         buf_reader.close();
     }
@@ -616,9 +587,8 @@ void Calculator::TermSim::init_obo_list()
         tmp_deque.pop_front();
         for (auto term : tmp_deque)
         {
-             id_term.emplace(term.get_id(), term);
+            id_term.emplace(term.get_id(), term);
         }
-       
 
         ofstream buf_writer;
         buf_writer.open(obo_buf);
@@ -626,7 +596,7 @@ void Calculator::TermSim::init_obo_list()
 
         for (auto term : id_term)
         {
-            
+
             buf_writer << term.second.get_id() << "|";
             buf_writer << term.second.get_name() << "|";
             buf_writer << static_cast<char>(term.second.get_name_space()) << "|";
@@ -654,15 +624,10 @@ void Calculator::TermSim::init_obo_list()
             // Log::log({__FILE__, __func__, "写入缓存完成"});
         }
     }
-    
 }
-
 
 void Calculator::TermSim::init_ancestor()
 {
-    
-
-    
 
     for (auto it : id_term)
     {
@@ -688,14 +653,10 @@ void Calculator::TermSim::init_ancestor()
         }
         id_ancestor.emplace(make_pair(it.first, ancestor));
     }
-
-
 }
-
 
 set<string> Calculator::TermSim::get_public_ancestor_by_id(string term1, string term2)
 {
-    
 
     set<string> public_ancestor;
 
@@ -723,4 +684,3 @@ set<string> Calculator::TermSim::get_public_ancestor_by_id(string term1, string 
 
     return public_ancestor;
 }
-

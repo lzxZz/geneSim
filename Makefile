@@ -6,7 +6,7 @@ OBJS = ./obj/main.o \
 		./obj/term.o \
 		./obj/term_index.o
 
-FLAGS = -Wall -pg -g
+FLAGS = -Wall -pg -g -std=c++11
 
 vpath %cpp ./src/
 vpath %.h  ./include/

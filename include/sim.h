@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <set>
 #include <initializer_list>
+#include <fstream>
 #include "defs.h"
 #include "anno.h"
 #include "term.h"
@@ -99,9 +100,13 @@ namespace Calculator
         static double get_gene_similarity_by_keys(string, string);
         // 计算基因和一个基因集合之间最大的相似度
         static double get_max_term_and_set_sim(string, set<string>, initializer_list<string>);
+
+        static void get_gene_similarity_by_keys_gen_ids(string, string, string);
+        static void get_ids_result(string, set<string>, string);
     public:
         // 基因相似度计算，参数分别为，要计算的基因对（\t分割），输出文件夹，并行线程数
         static void calculator(string, string, int = 2);
+        static void general(string,string,int =2);
     };
 
     class LFCValue

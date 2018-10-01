@@ -8,10 +8,8 @@
 #include <boost/algorithm/string.hpp>
 
 using std::ifstream;
-using std::ofstream;
 using std::istringstream;
-
-
+using std::ofstream;
 
 vector<string> Calculator::GeneSim::gene_pairs;
 unordered_map<string, set<string>> Calculator::GeneSim::gene_ids_annos;
@@ -34,13 +32,11 @@ void Calculator::GeneSim::calculator(string gene_pair_file, string out_file, int
     for (auto key : gene_pairs)
     {
         istringstream is(key);
-        string g1,g2;
+        string g1, g2;
         is >> g1 >> g2;
-        double sim_value = get_gene_similarity_by_keys(g1,g2);
+        double sim_value = get_gene_similarity_by_keys(g1, g2);
         out << g1 << "\t" << g2 << "\t" << sim_value << std::endl;
     }
-
-
 }
 
 double Calculator::GeneSim::get_gene_similarity_by_keys(string g1, string g2)
@@ -68,40 +64,37 @@ double Calculator::GeneSim::get_gene_similarity_by_keys(string g1, string g2)
     {
         top_value += get_max_term_and_set_sim(t2, iter_g1->second, {g1, g2});
     }
-    
-    
+
     return top_value / bottom_value;
 }
 
-double  Calculator::GeneSim::get_max_term_and_set_sim(string id, set<string> terms, initializer_list<string> ignore_genes)
+double Calculator::GeneSim::get_max_term_and_set_sim(string id, set<string> terms, initializer_list<string> ignore_genes)
 {
     double max_value = 0.0;
-    
+
     for (auto term : terms)
     {
-            //修改为从文件读取术语相似度,速度更快
-        double tmp_value = Calculator::TermSim::get_term_sim_by_ids_from_file(id, term, ignore_genes);
+        //修改为从文件读取术语相似度,速度更快
+        double tmp_value = 0;
+        if (id < term)
+            tmp_value = Calculator::TermSim::get_term_sim_by_ids_from_file(id, term, ignore_genes);
+        else
+            tmp_value = Calculator::TermSim::get_term_sim_by_ids_from_file(term, id, ignore_genes);
         max_value = max_value > tmp_value ? max_value : tmp_value;
     }
-
 
     return max_value;
 }
 
-
 void Calculator::GeneSim::init_data(string gene_pair_file)
 {
-    
+
     if (access(gene_pair_file.c_str(), 0) != 0)
     {
         std::cout << "基因对文件不存在，请检查路径或者使用LFCValue::gene_pair_generator()生成" << std::endl;
         return;
     }
-    std::cout << "开始初始化数据"  << std::endl;
-
-
-    
-
+    std::cout << "开始初始化数据" << std::endl;
 
     ifstream gene_input_file;
     gene_input_file.open(gene_pair_file);
@@ -136,7 +129,7 @@ void Calculator::GeneSim::init_data(string gene_pair_file)
         }
 
         //获取条目中的goid和注释的所有基因
-        
+
         set<string> genes; //注释的所有基因
 
         string gene_name = infos[2];
@@ -144,9 +137,8 @@ void Calculator::GeneSim::init_data(string gene_pair_file)
         //基因名称的同义词
         string syn = infos[10];
 
-        
         boost::split(infos, syn, boost::is_any_of("|"));
-        infos.pop_back();  //移除掉数据库名称
+        infos.pop_back(); //移除掉数据库名称
 
         genes.emplace(gene_name);
         for (auto gene : infos)
@@ -163,18 +155,97 @@ void Calculator::GeneSim::init_data(string gene_pair_file)
                 set<string> id_set;
                 id_set.emplace(go_id);
                 gene_ids_annos.emplace(std::make_pair(gene, id_set));
-
             }
-            else{
+            else
+            {
                 iter->second.emplace(go_id);
             }
         }
-
-
     }
-    
-
-    
-
 }
 
+void Calculator::GeneSim::general(string gene_pair_file, string ids_file, int thread_count)
+{
+    if (access(ids_file.c_str(), 0) == 0)
+    {
+        std::cout << "输出文件已存在，请重新指定文件名" << std::endl;
+        return;
+    }
+
+    std::cout << "计算基因相似度" << std::endl;
+
+    init_data(gene_pair_file);
+
+    for (auto key : gene_pairs)
+    {
+        istringstream is(key);
+        string g1, g2;
+        is >> g1 >> g2;
+        get_gene_similarity_by_keys_gen_ids(g1, g2, ids_file);
+    }
+
+    ifstream input;
+    input.open(ids_file);
+    assert(input.is_open());
+    set<string> pairs;
+    string line;
+    while (getline(input, line))
+    {
+        pairs.emplace(line);
+    }
+
+    input.close();
+    ofstream out;
+    out.open(ids_file);
+    assert(out.is_open());
+    for (auto line : pairs)
+    {
+        out << line << endl;
+    }
+    out.close();
+}
+
+void Calculator::GeneSim::get_gene_similarity_by_keys_gen_ids(string g1, string g2, string ids_file)
+{
+    auto iter_g1 = gene_ids_annos.find(g1);
+    auto iter_g2 = gene_ids_annos.find(g2);
+
+    if (iter_g1 == gene_ids_annos.end() || iter_g2 == gene_ids_annos.end())
+    {
+        return;
+    }
+
+    assert(iter_g1 != gene_ids_annos.end());
+    assert(iter_g2 != gene_ids_annos.end());
+
+    for (auto t1 : iter_g1->second)
+    {
+        get_ids_result(t1, iter_g2->second, ids_file);
+    }
+
+    for (auto t2 : iter_g2->second)
+    {
+        get_ids_result(t2, iter_g1->second, ids_file);
+    }
+}
+
+void Calculator::GeneSim::get_ids_result(string id, set<string> terms, string ids_file)
+{
+    ofstream out;
+    out.open(ids_file, std::ios_base::app);
+
+    for (auto term : terms)
+    {
+        //修改为从文件读取术语相似度,速度更快
+        if (id < term)
+        {
+            out << id << "\t" << term << endl;
+        }
+        else
+        {
+            out << term << "\t" << id << endl;
+        }
+    }
+
+    out.close();
+}
