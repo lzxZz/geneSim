@@ -14,7 +14,7 @@ using std::ofstream;
 vector<string> Calculator::GeneSim::gene_pairs;
 unordered_map<string, set<string>> Calculator::GeneSim::gene_ids_annos;
 
-void Calculator::GeneSim::calculator(string gene_pair_file, string out_file, int thread_count)
+void Calculator::GeneSim::calculator(string gene_pair_file, string out_file, string term_sim_file, int thread_count)
 {
     if (access(out_file.c_str(), 0) == 0)
     {
@@ -34,12 +34,12 @@ void Calculator::GeneSim::calculator(string gene_pair_file, string out_file, int
         istringstream is(key);
         string g1, g2;
         is >> g1 >> g2;
-        double sim_value = get_gene_similarity_by_keys(g1, g2);
+        double sim_value = get_gene_similarity_by_keys(term_sim_file, g1, g2);
         out << g1 << "\t" << g2 << "\t" << sim_value << std::endl;
     }
 }
 
-double Calculator::GeneSim::get_gene_similarity_by_keys(string g1, string g2)
+double Calculator::GeneSim::get_gene_similarity_by_keys(string term_sim_file,string g1, string g2)
 {
     auto iter_g1 = gene_ids_annos.find(g1);
     auto iter_g2 = gene_ids_annos.find(g2);
@@ -57,18 +57,18 @@ double Calculator::GeneSim::get_gene_similarity_by_keys(string g1, string g2)
 
     for (auto t1 : iter_g1->second)
     {
-        top_value += get_max_term_and_set_sim(t1, iter_g2->second, {g1, g2});
+        top_value += get_max_term_and_set_sim(term_sim_file, t1, iter_g2->second, {g1, g2});
     }
 
     for (auto t2 : iter_g2->second)
     {
-        top_value += get_max_term_and_set_sim(t2, iter_g1->second, {g1, g2});
+        top_value += get_max_term_and_set_sim(term_sim_file, t2, iter_g1->second, {g1, g2});
     }
 
     return top_value / bottom_value;
 }
 
-double Calculator::GeneSim::get_max_term_and_set_sim(string id, set<string> terms, initializer_list<string> ignore_genes)
+double Calculator::GeneSim::get_max_term_and_set_sim(string term_sim_file,string id, set<string> terms, initializer_list<string> ignore_genes)
 {
     double max_value = 0.0;
 
@@ -77,9 +77,9 @@ double Calculator::GeneSim::get_max_term_and_set_sim(string id, set<string> term
         //修改为从文件读取术语相似度,速度更快
         double tmp_value = 0;
         if (id < term)
-            tmp_value = Calculator::TermSim::get_term_sim_by_ids_from_file(id, term, ignore_genes);
+            tmp_value = Calculator::TermSim::get_term_sim_by_ids_from_file(term_sim_file, id, term, ignore_genes);
         else
-            tmp_value = Calculator::TermSim::get_term_sim_by_ids_from_file(term, id, ignore_genes);
+            tmp_value = Calculator::TermSim::get_term_sim_by_ids_from_file(term_sim_file, term, id, ignore_genes);
         max_value = max_value > tmp_value ? max_value : tmp_value;
     }
 

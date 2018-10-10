@@ -33,9 +33,9 @@ int Calculator::TermSim::cc_anno_count;
 
 unordered_map<string, double> Calculator::TermSim::keys_term_sim;
 static bool is_init;
-void Calculator::TermSim::init_file()
+void Calculator::TermSim::init_file(string date_file)
 {
-    ifstream input("./result/term.result");
+    ifstream input(date_file);
     assert(input.is_open());
     string line;
     while (getline(input, line))
@@ -50,11 +50,11 @@ void Calculator::TermSim::init_file()
     is_init = true;
 }
 
-double Calculator::TermSim::get_term_sim_by_ids_from_file(string term1, string term2, initializer_list<string> ignore_genes)
+double Calculator::TermSim::get_term_sim_by_ids_from_file(string term_sim_file,string term1, string term2, initializer_list<string> ignore_genes)
 {
     if (!is_init)
     {
-        init_file();
+        init_file(term_sim_file);
     }
     term1 = "GO" + term1.substr(3, 7);
     term2 = "GO" + term2.substr(3, 7);

@@ -40,7 +40,7 @@ namespace Calculator
         static double get_dab_via_index(string, string);
 
         static unordered_map<string, double>    keys_term_sim;
-        static void init_file();
+        static void init_file(string);
 
 
         //hash操作所使用的方法和数据
@@ -78,11 +78,12 @@ namespace Calculator
         static double get_term_sim_by_ids(string,string,initializer_list<string>);
 
         // 计算两个术语之间的相似度,最后一个参数为要忽略的基因列表
-        static double get_term_sim_by_ids_from_file(string,string,initializer_list<string>);
+        static double get_term_sim_by_ids_from_file(string, string,string,initializer_list<string>);
 
 
         // 计算术语对的显示度,为基因相似度的计算做准备,输入的网络数据文件,输出文件,并发数
         static void calculator(string, string, int = 2);
+        static void calculator_by_matrix(string, string, string);
     };
 
 
@@ -97,15 +98,15 @@ namespace Calculator
         // 初始化数据,参数为要计算的基因对
         static void init_data(string);
         // 计算两个基因的相似度
-        static double get_gene_similarity_by_keys(string, string);
+        static double get_gene_similarity_by_keys(string, string, string);
         // 计算基因和一个基因集合之间最大的相似度
-        static double get_max_term_and_set_sim(string, set<string>, initializer_list<string>);
+        static double get_max_term_and_set_sim(string, string, set<string>, initializer_list<string>);
 
         static void get_gene_similarity_by_keys_gen_ids(string, string, string);
         static void get_ids_result(string, set<string>, string);
     public:
         // 基因相似度计算，参数分别为，要计算的基因对（\t分割），输出文件夹，并行线程数
-        static void calculator(string, string, int = 2);
+        static void calculator(string, string,string, int = 2);
         static void general(string,string,int =2);
     };
 

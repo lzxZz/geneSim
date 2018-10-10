@@ -4,10 +4,19 @@
 #include <iostream>
 #include <cassert>
 using namespace std;
+#include "../include/matrix.h"
 
 
 int main()
 {
+        Matrix::Matrix matrix(2,2,10);
+        matrix.print();
+        matrix.set_value(0,0,1000);
+        matrix.print();
+        matrix.multi(0);
+        matrix.print();
+        Matrix::Matrix::getE(5).print();
+
 
         // 前三步的计算(矩阵完备化,术语相似度,基因相似度)都能够通过多线程来进行加速
         // 读取参数，选择要进行的计算，输出文件如果已经存在，则不会进行计算，避免覆盖掉已有数据
@@ -23,20 +32,22 @@ int main()
         // Calculator::GeneSim::general("./result/pair.result", "./result/ids.result");
         // Calculator::TermSim::calculator("./data/net.txt", "./result/term.result", 2);
 
+        // 依赖于距离矩阵,基因名称到索引的映射.
+        // Calculator::TermSim::calculator_by_matrix("./dir/result.mat","./dir/map.txt", "./result/term_by_matrix.result");
 
         // 基因相似度计算   GeneSim
         // 输入参数， 要计算的基因对文件，输出文件，线程数，默认为2
         // 依赖于术语相似度
         // Calculator::LFCValue::gene_pair_generator("./result/pair.result");
         
-        // Calculator::GeneSim::calculator("./result/pair.result", "./result/gene.result");
+        // Calculator::GeneSim::calculator("./result/pair.result", "./result/gene_matrix.result","./result/term_by_matrix.result");
 
         // lfc计算  Evaluator
         // 输入参数， 基因相似度文件，输出文件，是否输出到控制台
         // 依赖于基因相似度
         
         
-        Calculator::LFCValue::calculator("./result/gene.result", "./result/lfc.result", true);
+        // Calculator::LFCValue::calculator("./result/gene_matrix.result", "./result/lfc_matrix.result", true);
 
         return 0;
 }

@@ -1,3 +1,14 @@
+## 10.10更新
+修改term_index文件,将迭代出来的矩阵直接用于计算.
+在term_idnex文件中需要完成的职责为:初始化矩阵,完成基因名称到序号的映射.
+
+需要重新修改相关的接口.
+Term_sim新增加接口`calculator_by_matrix(matrix_file, map_file, result.file)`
+
+若干个接口修改.
+
+初步完成matrix库
+
 ## 10.01更新
 追加`GeneSim::general(input,outfile)`方法,来生成要计算的术语对,为`TermSim::Calculator`方法提供初始化素材
 **此版本能够运行,在C++11环境下编译,并顺序依次执行`main`中注释的各个方法就能够完成最终的计算**

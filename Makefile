@@ -15,7 +15,7 @@ vpath %.h  ./include/
 $(TARGET) : $(OBJS)
 	g++ $(FLAGS) -o $(TARGET) $(OBJS)
 
-./obj/main.o : main.cpp sim.h
+./obj/main.o : main.cpp sim.h matrix.h
 	gcc -c $(FLAGS) ./src/main.cpp -o ./obj/main.o
 
 ./obj/lfc.o : lfc.cpp sim.h
