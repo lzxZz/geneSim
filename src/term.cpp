@@ -1,4 +1,4 @@
-#include "../include/sim.h"
+#include "../include/sim_term.h"
 
 #include <iostream>
 #include <fstream>
@@ -10,6 +10,9 @@
 #include <regex>
 #include <deque>
 
+
+
+
 using std::cout;
 using std::deque;
 using std::endl;
@@ -17,6 +20,12 @@ using std::ifstream;
 using std::istringstream;
 using std::ofstream;
 using std::regex;
+
+using std::string;
+using std::vector;
+using std::unordered_map;
+using std::set;
+using std::initializer_list;
 
 vector<string> Calculator::TermSim::term_pair;
 vector<Annotation> Calculator::TermSim::gaf_items;
@@ -26,50 +35,16 @@ unordered_map<string, set<string>> Calculator::TermSim::id_gene_annos;
 unordered_map<string, Term> Calculator::TermSim::id_term;
 unordered_map<string, set<string>> Calculator::TermSim::id_ancestor;
 
+
 // 分支上所属的注释基因数目
 int Calculator::TermSim::bp_anno_count;
 int Calculator::TermSim::mf_anno_count;
 int Calculator::TermSim::cc_anno_count;
 
-unordered_map<string, double> Calculator::TermSim::keys_term_sim;
-static bool is_init;
-void Calculator::TermSim::init_file(string date_file)
-{
-    ifstream input(date_file);
-    assert(input.is_open());
-    string line;
-    while (getline(input, line))
-    {
-        istringstream is(line);
-        string t1, t2;
-        double value;
-        is >> t1 >> t2 >> value;
-
-        keys_term_sim.emplace(std::make_pair(t1 + ":" + t1, value));
-    }
-    is_init = true;
-}
-
-double Calculator::TermSim::get_term_sim_by_ids_from_file(string term_sim_file,string term1, string term2, initializer_list<string> ignore_genes)
-{
-    if (!is_init)
-    {
-        init_file(term_sim_file);
-    }
-    term1 = "GO" + term1.substr(3, 7);
-    term2 = "GO" + term2.substr(3, 7);
-    auto iter = keys_term_sim.find(term1 + ":" + term2);
-
-    if (iter != keys_term_sim.end())
-    {
-        return iter->second;
-    }
-
-    return 0;
-}
 // 计算两个术语的相似度,  忽略指定的基因(论文中的除一法)
 double Calculator::TermSim::get_term_sim_by_ids(string term1, string term2, initializer_list<string> ignore_genes)
 {
+    
 
     // 函数所执行的操作说明见论文
 
@@ -655,9 +630,10 @@ void Calculator::TermSim::init_ancestor()
     }
 }
 
-set<string> Calculator::TermSim::get_public_ancestor_by_id(string term1, string term2)
+std::set<string> Calculator::TermSim::get_public_ancestor_by_id(string term1, string term2)
 {
 
+    
     set<string> public_ancestor;
 
     auto it1 = id_ancestor.find(term1);

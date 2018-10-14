@@ -1,4 +1,6 @@
-#include "../include/sim.h"
+#include "../include/sim_term.h"
+#include "../include/sim_gene.h"
+#include "../include/sim_lfc.h"
 
 #include <fstream>
 #include <iostream>
@@ -9,13 +11,13 @@ using namespace std;
 
 int main()
 {
-        Matrix::Matrix matrix(2,2,10);
-        matrix.print();
-        matrix.set_value(0,0,1000);
-        matrix.print();
-        matrix.multi(0);
-        matrix.print();
-        Matrix::Matrix::getE(5).print();
+        // Matrix::Matrix matrix(2,2,10);
+        // matrix.print();
+        // matrix.set_value(0,0,1000);
+        // matrix.print();
+        // matrix.multi(0);
+        // matrix.print();
+        // Matrix::Matrix::getE(5).print();
 
 
         // 前三步的计算(矩阵完备化,术语相似度,基因相似度)都能够通过多线程来进行加速
@@ -47,7 +49,7 @@ int main()
         // 依赖于基因相似度
         
         
-        // Calculator::LFCValue::calculator("./result/gene_matrix.result", "./result/lfc_matrix.result", true);
+        Calculator::LFCValue::calculator("./result/gene_matrix.result", "./result/lfc_matrix1.result", true);
 
         return 0;
 }

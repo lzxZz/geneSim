@@ -1,4 +1,4 @@
-#include "../include/sim.h"
+#include "../include/sim_term.h"
 #include <iostream>
 #include <fstream>
 #include <cassert>
@@ -17,6 +17,13 @@ using std::istringstream;
 using std::deque;
 using std::regex;
 
+
+using std::string;
+using std::vector;
+using std::unordered_map;
+using std::set;
+using std::initializer_list;
+
 // 基因名称到索引的映射
 unordered_map<string, int>       Calculator::TermSim::gene_index;
 
@@ -32,6 +39,15 @@ unordered_map<string, vector<int>>      Calculator::TermSim::id_gene_index_anno;
 
 void Calculator::TermSim::calculator_by_matrix(string matrix_file, string map_file, string out_file)
 {
+
+    //确定输出文件不存在,以防止错误参数对已有结果的覆盖
+    if (access(out_file.c_str(), 0) == 0)
+    {
+        std::cout << "术语相似度-相似度输出文件已存在，请重新指定文件名" << std::endl;
+        return;
+    }
+
+
     //首先完成基因名称到索引的映射.
     ifstream input_map;
     input_map.open(map_file);
@@ -158,7 +174,7 @@ void Calculator::TermSim::init_array_data()
 {
     //开始读取网络数据
     ifstream input_net;
-    input_net.open("./data/net.txt");
+    input_net.open("./data/.txt");
     assert(input_net.is_open());
     
     //读取基因的名称
@@ -173,7 +189,7 @@ void Calculator::TermSim::init_array_data()
     }
 
     //用0初始化矩阵
-    for (auto i = 0; i < gene_names.size(); i++)
+    for (size_t i = 0; i < gene_names.size(); i++)
     {
         vector<double> tmp_vec(gene_names.size(),0);
         
@@ -255,19 +271,11 @@ vector<int> Calculator::TermSim::get_anno_gene_index_set_by_id(string id)
 double Calculator::TermSim::get_net_value_by_index(int x, int y)
 {
     
-    if (x < 0)
+    if (x < 0 || y < 0 )
     {
         return 0;
     }
-    if (y < 0 )
-    {
-        return 0;
-    }
-    if (x >= gene_index.size())
-    {
-        return 0;
-    }   
-    if (y >= gene_index.size())
+    if (x >= gene_index.size()|| y >= gene_index.size()) //--------------> 此处使用int和size_t比较是因为维度可能有负数,但是上面已经判断过了,是安全的
     {
         return 0;
     }

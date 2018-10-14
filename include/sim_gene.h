@@ -18,7 +18,7 @@ namespace Calculator{
         //术语对相似度的map,两个goid使用:分割.
         static std::unordered_map<std::string, double>    keys_term_sim;
 
-        // 初始化数据,参数为要计算的基因对
+        // 初始化数据,参数为要计算的基因对,已经计算出来的术语相似度文件
         static void init_data(std::string,std::string);
 
         // 计算两个基因的相似度
@@ -32,7 +32,7 @@ namespace Calculator{
         // //初始化数据,输入参数为要计算的基因对和已经求值完毕的术语相似度.
         // static void init_file(std::string,std::string);
     public:
-        // 基因相似度计算，参数分别为，要计算的基因对（\t分割），输出文件夹，并行线程数
+        // 基因相似度计算，参数分别为，要计算的基因对（\t分割），输出文件夹，术语相似度文件,并行线程数
         static void calculator(std::string, std::string,std::string, int = 2);
         
         
